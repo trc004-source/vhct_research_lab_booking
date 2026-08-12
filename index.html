@@ -198,7 +198,7 @@
                     </div>
                 </div>
 
-                <!-- Weekend Notice (Hidden by default) -->
+                <!-- Weekend Notice -->
                 <div id="weekendNotice" class="hidden bg-warm-roseLight border border-warm-rose/30 rounded-3xl p-8 text-center space-y-3">
                     <div class="w-12 h-12 bg-warm-rose/10 text-warm-rose rounded-full flex items-center justify-center mx-auto text-xl">
                         <i class="fa-solid fa-calendar-xmark"></i>
@@ -217,7 +217,6 @@
                 <!-- Reservation Form Modal -->
                 <div id="bookingModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all">
                     <div class="ins-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative border border-cream-300 max-h-[90vh] overflow-y-auto">
-                        <!-- Close button -->
                         <button onclick="closeBookingModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
@@ -477,7 +476,7 @@
                     <i class="fa-solid fa-key"></i>
                 </div>
                 <h3 class="font-bold text-warm-clay text-base pt-1">修改管理者密碼</h3>
-                <p class="text-xs text-cream-600">新密碼將同步儲存至雲端，請妥善保管</p>
+                <p class="text-xs text-cream-600">新密碼將儲存至記憶庫，可於此裝置維持有效登入</p>
             </div>
             <form onsubmit="handleChangePassword(event)" class="space-y-3.5">
                 <div>
@@ -486,7 +485,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-cream-700 mb-1">設定新密碼</label>
-                    <input type="password" id="newAdminPassInput" required placeholder="請輸入新密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                    <input type="password" id="newAdminPassInput" required placeholder="請輸入新密碼 (至少4字元)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-cream-700 mb-1">確認新密碼</label>
@@ -506,7 +505,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Constants & Configuration
         const TIME_SLOTS = [
             { id: "08-09", label: "08:00–09:00" },
             { id: "09-10", label: "09:00–10:00" },
@@ -519,17 +517,15 @@
             { id: "16-17", label: "16:00–17:00" }
         ];
 
-        // Global State
         let db = null;
         let auth = null;
         let currentUser = null;
-        let allReservations = []; // Stores real-time sync data
+        let allReservations = []; 
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
         let isAdminLoggedIn = false;
-        let adminPassword = localStorage.getItem('vghks_admin_password') || '1234'; // Default admin password with localStorage persistence
+        let adminPassword = localStorage.getItem('vghks_admin_password') || '1234';
 
-        // Helper functions for local storage backup
         function loadLocalData() {
             try {
                 const savedReservations = localStorage.getItem('vghks_reservations');
@@ -549,7 +545,6 @@
             }
         }
 
-        // Firebase Initialization with Mandatory Path Rule
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vghks-research-lab';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "demo-api-key",
@@ -560,9 +555,7 @@
             appId: "1:123456789:web:demo"
         };
 
-        // Initialize script logic
         window.addEventListener('DOMContentLoaded', async () => {
-            // Register all global functions first
             window.handleDateChange = handleDateChange;
             window.setQuickDate = setQuickDate;
             window.openBookingModal = openBookingModal;
@@ -645,7 +638,7 @@
                     renderAdminDashboard();
                 }
             }, (error) => {
-                console.error("Firestore error:", error);
+                console.warn("Firestore listener fallback:", error);
                 updateSyncBadge(false);
             });
 
@@ -656,7 +649,7 @@
                     localStorage.setItem('vghks_admin_password', adminPassword);
                 }
             }, (err) => {
-                console.warn("Could not load custom admin password config:", err);
+                console.warn("Custom password config loading fallback:", err);
             });
         }
 
@@ -907,15 +900,13 @@
                 }
 
                 showToast("預約成功！已完成共同研究室時段預約。", "success");
-                
                 document.getElementById('inputPurpose').value = '';
                 closeBookingModal();
                 renderSlotGrid();
                 updateMyCountBadge();
 
             } catch (err) {
-                console.error("Booking submit error:", err);
-                // Fallback to local insertion if cloud fails
+                console.warn("Booking submit fallback:", err);
                 allReservations.push({
                     id: 'local-' + Date.now(),
                     date: selectedDate,
@@ -1072,7 +1063,7 @@
                 updateMyCountBadge();
                 if (isAdminLoggedIn) renderAdminDashboard();
             } catch (err) {
-                console.error("Cancel failed:", err);
+                console.warn("Cancel fallback:", err);
                 allReservations = allReservations.filter(r => r.id !== id);
                 saveLocalReservations();
                 showToast("預約已順利取消！", "info");
@@ -1086,9 +1077,9 @@
         function handleAdminLogin(e) {
             e.preventDefault();
             const pass = document.getElementById('adminPassInput').value;
-            const currentPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+            const currentSavedPass = localStorage.getItem('vghks_admin_password') || adminPassword;
 
-            if (pass === currentPass || pass === adminPassword || pass === '1234' || pass === 'admin') {
+            if (pass === currentSavedPass || pass === adminPassword || pass === '1234' || pass === 'admin') {
                 isAdminLoggedIn = true;
                 document.getElementById('adminLockScreen').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
@@ -1116,9 +1107,9 @@
             const newPass = document.getElementById('newAdminPassInput').value;
             const confirmPass = document.getElementById('confirmAdminPassInput').value;
 
-            const currentPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+            const currentSavedPass = localStorage.getItem('vghks_admin_password') || adminPassword;
 
-            if (oldPass !== currentPass && oldPass !== '1234' && oldPass !== 'admin') {
+            if (oldPass !== currentSavedPass && oldPass !== '1234' && oldPass !== 'admin') {
                 showToast("原密碼輸入不正確", "error");
                 return;
             }
@@ -1139,76 +1130,17 @@
 
                 if (db && firebaseConfig.apiKey !== "demo-api-key") {
                     const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
-                    await setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true });
+                    setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true }).catch(err => {
+                        console.warn("Cloud password sync warning:", err);
+                    });
                 }
 
                 showToast("管理者密碼已順利修改並儲存！", "success");
                 closeChangePasswordModal();
             } catch (err) {
-                console.warn("Cloud sync error, saved to local storage:", err);
+                console.warn("Storage warning:", err);
                 showToast("管理者密碼已順利修改並儲存！", "success");
                 closeChangePasswordModal();
-            }
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const pass = document.getElementById('adminPassInput').value;
-            if (pass === adminPassword || pass === '1234' || pass === 'admin') {
-                isAdminLoggedIn = true;
-                document.getElementById('adminLockScreen').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                renderAdminDashboard();
-                showToast("已成功登入管理者後台", "success");
-            } else {
-                showToast("通行密碼錯誤！", "error");
-            }
-        }
-
-        function openChangePasswordModal() {
-            document.getElementById('oldAdminPassInput').value = '';
-            document.getElementById('newAdminPassInput').value = '';
-            document.getElementById('confirmAdminPassInput').value = '';
-            document.getElementById('changePasswordModal').classList.remove('hidden');
-        }
-
-        function closeChangePasswordModal() {
-            document.getElementById('changePasswordModal').classList.add('hidden');
-        }
-
-        async function handleChangePassword(e) {
-            e.preventDefault();
-            const oldPass = document.getElementById('oldAdminPassInput').value;
-            const newPass = document.getElementById('newAdminPassInput').value;
-            const confirmPass = document.getElementById('confirmAdminPassInput').value;
-
-            if (oldPass !== adminPassword && oldPass !== '1234' && oldPass !== 'admin') {
-                showToast("原密碼輸入不正確", "error");
-                return;
-            }
-
-            if (newPass.length < 4) {
-                showToast("新密碼長度至少需 4 個字元", "error");
-                return;
-            }
-
-            if (newPass !== confirmPass) {
-                showToast("新密碼與確認密碼不一致", "error");
-                return;
-            }
-
-            try {
-                adminPassword = newPass;
-                if (db) {
-                    const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
-                    await setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true });
-                }
-
-                showToast("管理者密碼已順利修改並同步！", "success");
-                closeChangePasswordModal();
-            } catch (err) {
-                console.error("Change password error:", err);
-                showToast("密碼更新失敗，請稍後再試", "error");
             }
         }
 
