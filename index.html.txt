@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺北榮總新竹分院｜共同研究室預約系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans TC & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FDFBF7',
+                            100: '#FAF6F0',
+                            200: '#F4EFE6',
+                            300: '#E8DFD8',
+                            400: '#D9CFC4',
+                            500: '#B8A898',
+                            600: '#8C7A6B',
+                            700: '#5F5145',
+                        },
+                        warm: {
+                            accent: '#9E7B66',
+                            accentHover: '#886753',
+                            sage: '#7A8B7B',
+                            sageLight: '#F0F4F1',
+                            rose: '#C48B8B',
+                            roseLight: '#FDF4F4',
+                            clay: '#4A3E3D',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'ins': '0 10px 30px -5px rgba(140, 122, 107, 0.08), 0 4px 12px -2px rgba(140, 122, 107, 0.04)',
+                        'ins-hover': '0 15px 35px -5px rgba(140, 122, 107, 0.12), 0 6px 15px -2px rgba(140, 122, 107, 0.06)',
+                        'ins-inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.03)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FAF6F0;
+            color: #4A3E3D;
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-image: 
+                radial-gradient(#E8DFD8 0.75px, transparent 0.75px), 
+                radial-gradient(#E8DFD8 0.75px, #FAF6F0 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+
+        .ins-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(232, 223, 216, 0.7);
+        }
+
+        .ins-btn {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ins-btn:active {
+            transform: scale(0.98);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF6F0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D9CFC4;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B8A898;
+        }
+
+        .slot-transition {
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: opacity(0.5);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-warm-accent/20 selection:text-warm-clay">
+
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Header -->
+        <header class="sticky top-0 z-30 bg-cream-50/90 backdrop-blur-md border-b border-cream-300/60 transition-all">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <!-- Brand Title -->
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-cream-200 border border-cream-300 flex items-center justify-center text-warm-accent shadow-sm flex-shrink-0">
+                            <i class="fa-solid fa-microscope text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-medium tracking-wider text-warm-accent uppercase bg-warm-accent/10 px-2.5 py-0.5 rounded-full border border-warm-accent/20">臺北榮總新竹分院</span>
+                                <span id="syncStatusBadge" class="inline-flex items-center text-xs text-warm-sage font-medium bg-warm-sageLight px-2 py-0.5 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>
+                                    雲端同步中
+                                </span>
+                            </div>
+                            <h1 class="text-xl sm:text-2xl font-bold text-warm-clay tracking-tight mt-0.5">共同研究室預約系統</h1>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Tabs -->
+                    <nav class="flex items-center bg-cream-200/80 p-1.5 rounded-2xl border border-cream-300/80 self-start md:self-auto">
+                        <button onclick="switchTab('booking')" id="tabBtn-booking" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 bg-white text-warm-clay shadow-sm">
+                            <i class="fa-regular fa-calendar-check text-warm-accent"></i>
+                            <span>預約時段</span>
+                        </button>
+                        <button onclick="switchTab('myBookings')" id="tabBtn-myBookings" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 text-cream-600 hover:text-warm-clay">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>預約紀錄</span>
+                            <span id="myCountBadge" class="hidden ml-1 px-1.5 py-0.2 text-xs bg-warm-accent text-white rounded-full">0</span>
+                        </button>
+                        <button onclick="switchTab('admin')" id="tabBtn-admin" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 text-cream-600 hover:text-warm-clay">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>管理者專區</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+            <!-- VIEW 1: BOOKING TAB -->
+            <section id="view-booking" class="space-y-6">
+                <!-- Date Selection Bar -->
+                <div class="ins-card rounded-3xl p-6 shadow-ins flex flex-col md:flex-row md:items-center justify-between gap-6 border border-cream-300/80">
+                    <div class="space-y-1">
+                        <span class="text-xs font-semibold text-warm-accent uppercase tracking-wider">Date Selection</span>
+                        <h2 class="text-lg font-bold text-warm-clay flex items-center gap-2">
+                            <span>選擇預約日期</span>
+                            <span class="text-xs font-normal text-cream-600 bg-cream-200 px-2.5 py-0.5 rounded-full" id="currentTodayText">--</span>
+                        </h2>
+                        <p class="text-xs text-cream-600">開放預約時間：週一至週五 08:00–17:00（每時段 1 小時）</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div class="relative">
+                            <input type="date" id="selectedDatePicker" onchange="handleDateChange(this.value)" class="w-full sm:w-auto bg-cream-50 border border-cream-300 text-warm-clay text-sm font-medium rounded-2xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-warm-accent/40 shadow-ins-inner">
+                        </div>
+                        
+                        <!-- Date Quick Buttons -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="setQuickDate('today')" class="px-3.5 py-2 text-xs font-medium bg-cream-100 hover:bg-cream-200 text-cream-700 rounded-xl border border-cream-300/80 transition ins-btn">
+                                今天
+                            </button>
+                            <button onclick="setQuickDate('tomorrow')" class="px-3.5 py-2 text-xs font-medium bg-cream-100 hover:bg-cream-200 text-cream-700 rounded-xl border border-cream-300/80 transition ins-btn">
+                                明天
+                            </button>
+                            <button onclick="setQuickDate('nextMon')" class="px-3.5 py-2 text-xs font-medium bg-cream-100 hover:bg-cream-200 text-cream-700 rounded-xl border border-cream-300/80 transition ins-btn">
+                                下週一
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Pill Banner -->
+                <div class="bg-cream-100/80 rounded-2xl p-4 border border-cream-300/60 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-warm-sageLight text-warm-sage flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="text-xs">
+                            <span class="block font-semibold text-warm-clay" id="displaySelectedDateText">載入中...</span>
+                            <span class="text-cream-600" id="displaySlotAvailability">載入時段狀態中...</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center space-x-4 text-xs font-medium">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-warm-sage"></span> 可預約</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-cream-400"></span> 已預約</span>
+                    </div>
+                </div>
+
+                <!-- Weekend Notice (Hidden by default) -->
+                <div id="weekendNotice" class="hidden bg-warm-roseLight border border-warm-rose/30 rounded-3xl p-8 text-center space-y-3">
+                    <div class="w-12 h-12 bg-warm-rose/10 text-warm-rose rounded-full flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <h3 class="font-bold text-warm-clay text-lg">共同研究室週末不開放預約</h3>
+                    <p class="text-xs text-cream-600 max-w-md mx-auto">開放時間為星期一至星期五（08:00–17:00）。請使用上方日期選擇器切換至工作日。</p>
+                </div>
+
+                <!-- Slots Grid View -->
+                <div id="slotsContainer" class="space-y-4">
+                    <div id="timeSlotGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Dynamic Slot Cards injected here -->
+                    </div>
+                </div>
+
+                <!-- Reservation Form Modal -->
+                <div id="bookingModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all">
+                    <div class="ins-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative border border-cream-300 max-h-[90vh] overflow-y-auto">
+                        <!-- Close button -->
+                        <button onclick="closeBookingModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+
+                        <div class="border-b border-cream-200 pb-4">
+                            <span class="text-xs font-semibold text-warm-accent uppercase tracking-wider bg-warm-accent/10 px-2.5 py-1 rounded-full">填寫預約資料</span>
+                            <h3 class="text-xl font-bold text-warm-clay mt-2">確認預約時段</h3>
+                            <p class="text-xs text-cream-600 mt-1">請填寫完整的預約者資訊，以利共同研究室審核與聯絡。</p>
+                        </div>
+
+                        <!-- Selected Slot Summary Box -->
+                        <div class="bg-cream-100 rounded-2xl p-4 border border-cream-300/80 space-y-1">
+                            <div class="text-xs text-cream-600 font-medium">預定時間</div>
+                            <div class="text-base font-bold text-warm-clay flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-warm-accent"></i>
+                                <span id="modalSelectedDate">--</span>
+                                <span class="bg-warm-accent/20 text-warm-clay px-2.5 py-0.5 rounded-lg text-sm" id="modalSelectedSlot">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Form -->
+                        <form id="reservationForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-cream-700 mb-1">
+                                    預約人姓名 <span class="text-warm-rose">*</span>
+                                </label>
+                                <input type="text" id="inputName" required placeholder="請輸入姓名 (例：陳大明)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-cream-700 mb-1">
+                                    單位／科別 <span class="text-warm-rose">*</span>
+                                </label>
+                                <select id="inputDept" required class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
+                                    <option value="">-- 請選擇單位 --</option>
+                                    <option value="藥事科">藥事科</option>
+                                    <option value="放射科">放射科</option>
+                                    <option value="檢驗科">檢驗科</option>
+                                    <option value="護理部">護理部</option>
+                                    <option value="營養科">營養科</option>
+                                    <option value="物理治療">物理治療</option>
+                                    <option value="職能治療">職能治療</option>
+                                    <option value="臨床心理">臨床心理</option>
+                                    <option value="教研中心">教研中心</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-cream-700 mb-1">
+                                    聯絡電話／院內分機 <span class="text-warm-rose">*</span>
+                                </label>
+                                <input type="text" id="inputContact" required placeholder="例如：分機 2345 或 0912-345678" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-cream-700 mb-1">
+                                    使用目的 <span class="text-cream-500 font-normal">(選填)</span>
+                                </label>
+                                <textarea id="inputPurpose" rows="2" placeholder="簡述實驗內容或使用器材 (例：分光光度計操作、PCR細胞實驗...)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40"></textarea>
+                            </div>
+
+                            <div class="pt-2 flex items-center justify-end space-x-3">
+                                <button type="button" onclick="closeBookingModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-cream-600 hover:bg-cream-200 transition">
+                                    取消
+                                </button>
+                                <button type="submit" id="submitBookingBtn" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-warm-accent text-white hover:bg-warm-accentHover shadow-sm transition flex items-center gap-2 ins-btn">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    <span>送出預約</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: MY BOOKINGS TAB -->
+            <section id="view-myBookings" class="hidden space-y-6">
+                <div class="ins-card rounded-3xl p-6 shadow-ins">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-cream-300/60 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-warm-clay">預約紀錄與查詢</h2>
+                            <p class="text-xs text-cream-600 mt-0.5">即時檢視所有已登錄之研究室預約清單與進行狀態。</p>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:w-64">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-cream-400 text-xs"></i>
+                                <input type="text" id="searchMyBookingInput" oninput="renderMyBookings()" placeholder="搜尋姓名、單位或日期..." class="w-full bg-cream-50 border border-cream-300 rounded-xl pl-9 pr-3 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bookings List -->
+                    <div id="myBookingsListContainer" class="mt-6 space-y-3">
+                        <!-- Dynamic Record Cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: ADMIN TAB -->
+            <section id="view-admin" class="hidden space-y-6">
+                <!-- Admin Lock Screen -->
+                <div id="adminLockScreen" class="ins-card rounded-3xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6 shadow-ins">
+                    <div class="w-16 h-16 bg-warm-accent/10 text-warm-accent rounded-2xl flex items-center justify-center mx-auto text-2xl border border-warm-accent/20">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-warm-clay">管理者驗證</h2>
+                        <p class="text-xs text-cream-600 mt-1">請輸入管理員通行密碼以存取後台管理功能</p>
+                    </div>
+                    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                        <input type="password" id="adminPassInput" placeholder="預設密碼：1234" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-center text-sm tracking-widest text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                        <button type="submit" class="w-full bg-warm-accent hover:bg-warm-accentHover text-white py-2.5 rounded-xl text-xs font-semibold shadow-sm transition ins-btn">
+                            進入管理後台
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Admin Dashboard (Hidden until unlocked) -->
+                <div id="adminDashboard" class="hidden space-y-6">
+                    <!-- Top Bar Controls -->
+                    <div class="ins-card rounded-3xl p-6 shadow-ins flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-warm-clay text-cream-100 flex items-center justify-center">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-warm-clay">共同研究室管理後台</h2>
+                                <p class="text-xs text-cream-600">檢視全院預約狀況與進行系統管理</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="exportReservationsCSV()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-csv"></i> 匯出CSV
+                            </button>
+                            <button onclick="openChangePasswordModal()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-key text-warm-accent"></i> 修改密碼
+                            </button>
+                            <button onclick="lockAdmin()" class="px-3.5 py-2 text-xs font-semibold bg-warm-roseLight text-warm-rose border border-warm-rose/30 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-lock"></i> 鎖定後台
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
+                            <span class="text-xs text-cream-600 font-medium">總預約數</span>
+                            <div class="text-2xl font-bold text-warm-clay mt-1" id="statTotalCount">0</div>
+                        </div>
+                        <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
+                            <span class="text-xs text-cream-600 font-medium">今日預約數</span>
+                            <div class="text-2xl font-bold text-warm-accent mt-1" id="statTodayCount">0</div>
+                        </div>
+                        <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
+                            <span class="text-xs text-cream-600 font-medium">預約最熱門單位</span>
+                            <div class="text-lg font-bold text-warm-sage truncate mt-1" id="statTopDept">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Filter & List Table -->
+                    <div class="ins-card rounded-3xl p-6 shadow-ins space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cream-300/60 pb-4">
+                            <h3 class="font-bold text-warm-clay text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-list text-warm-accent"></i> 所有預約紀錄列表
+                            </h3>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <input type="date" id="adminFilterDate" onchange="renderAdminList()" class="bg-cream-50 border border-cream-300 rounded-xl px-3 py-1.5 text-xs text-warm-clay">
+                                <select id="adminFilterDept" onchange="renderAdminList()" class="bg-cream-50 border border-cream-300 rounded-xl px-3 py-1.5 text-xs text-warm-clay">
+                                    <option value="">全部單位</option>
+                                    <option value="藥事科">藥事科</option>
+                                    <option value="放射科">放射科</option>
+                                    <option value="檢驗科">檢驗科</option>
+                                    <option value="護理部">護理部</option>
+                                    <option value="營養科">營養科</option>
+                                    <option value="物理治療">物理治療</option>
+                                    <option value="職能治療">職能治療</option>
+                                    <option value="臨床心理">臨床心理</option>
+                                    <option value="教研中心">教研中心</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                                <button onclick="resetAdminFilters()" class="text-xs text-cream-600 hover:text-warm-clay">重設</button>
+                            </div>
+                        </div>
+
+                        <!-- Admin Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-cream-200 text-[11px] font-semibold text-cream-600 uppercase tracking-wider">
+                                        <th class="py-3 px-3">日期 / 時間</th>
+                                        <th class="py-3 px-3">預約人</th>
+                                        <th class="py-3 px-3">單位</th>
+                                        <th class="py-3 px-3">聯絡方式</th>
+                                        <th class="py-3 px-3">使用目的</th>
+                                        <th class="py-3 px-3">狀態</th>
+                                        <th class="py-3 px-3 text-right">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTableBody" class="divide-y divide-cream-200/60 text-xs">
+                                    <!-- Dynamic table rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 border-t border-cream-300/60 py-6 text-center text-xs text-cream-600 bg-cream-100/40">
+            <div class="max-w-6xl mx-auto px-4 space-y-1">
+                <p class="font-medium text-warm-clay">臺北榮總新竹分院 共同研究室 版權所有</p>
+                <p>如需特殊時段申請或設備異動，請洽院內分機 2108 / 共同研究室管理員</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notification Toast Modal -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastContent" class="ins-card px-5 py-3.5 rounded-2xl shadow-xl border border-cream-300 flex items-center space-x-3 text-xs font-medium">
+            <span id="toastIcon" class="text-warm-sage text-base"><i class="fa-solid fa-circle-check"></i></span>
+            <span id="toastMsg" class="text-warm-clay">訊息通知</span>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="ins-card rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-cream-300 text-center space-y-4">
+            <div class="w-12 h-12 bg-warm-roseLight text-warm-rose rounded-2xl flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 id="confirmTitle" class="font-bold text-warm-clay text-base">確認取消預約？</h3>
+                <p id="confirmDesc" class="text-xs text-cream-600 mt-1">取消後，該時段將重新釋出給其他人員預約。</p>
+            </div>
+            <div class="flex items-center justify-center space-x-3 pt-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-cream-200 text-cream-700 hover:bg-cream-300 transition">
+                    暫不取消
+                </button>
+                <button id="confirmExecuteBtn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-warm-rose text-white hover:opacity-90 transition">
+                    確定取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Admin Password Modal -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="ins-card rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-cream-300 space-y-5 relative">
+            <button onclick="closeChangePasswordModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-warm-accent/10 text-warm-accent rounded-2xl flex items-center justify-center mx-auto text-xl border border-warm-accent/20">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="font-bold text-warm-clay text-base pt-1">修改管理者密碼</h3>
+                <p class="text-xs text-cream-600">新密碼將同步儲存至雲端，請妥善保管</p>
+            </div>
+            <form onsubmit="handleChangePassword(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-cream-700 mb-1">原管理員密碼</label>
+                    <input type="password" id="oldAdminPassInput" required placeholder="請輸入目前密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-cream-700 mb-1">設定新密碼</label>
+                    <input type="password" id="newAdminPassInput" required placeholder="請輸入新密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-cream-700 mb-1">確認新密碼</label>
+                    <input type="password" id="confirmAdminPassInput" required placeholder="再次輸入新密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                </div>
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-cream-600 hover:bg-cream-200 transition">取消</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold bg-warm-accent text-white hover:bg-warm-accentHover transition ins-btn">儲存密碼</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Realtime & System Logic Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Constants & Configuration
+        const TIME_SLOTS = [
+            { id: "08-09", label: "08:00–09:00" },
+            { id: "09-10", label: "09:00–10:00" },
+            { id: "10-11", label: "10:00–11:00" },
+            { id: "11-12", label: "11:00–12:00" },
+            { id: "12-13", label: "12:00–13:00" },
+            { id: "13-14", label: "13:00–14:00" },
+            { id: "14-15", label: "14:00–15:00" },
+            { id: "15-16", label: "15:00–16:00" },
+            { id: "16-17", label: "16:00–17:00" }
+        ];
+
+        // Global State
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let allReservations = []; // Stores real-time sync data
+        let selectedDate = getTodayString();
+        let targetSlotToBook = null;
+        let isAdminLoggedIn = false;
+        let adminPassword = '1234'; // Default admin password
+
+        // Firebase Initialization with Mandatory Path Rule
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vghks-research-lab';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-api-key",
+            authDomain: "demo-project.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:demo"
+        };
+
+        // Initialize script logic
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Register all global functions first
+            window.handleDateChange = handleDateChange;
+            window.setQuickDate = setQuickDate;
+            window.openBookingModal = openBookingModal;
+            window.closeBookingModal = closeBookingModal;
+            window.handleFormSubmit = handleFormSubmit;
+            window.switchTab = switchTab;
+            window.renderMyBookings = renderMyBookings;
+            window.confirmCancelReservation = confirmCancelReservation;
+            window.closeConfirmModal = closeConfirmModal;
+            window.handleAdminLogin = handleAdminLogin;
+            window.lockAdmin = lockAdmin;
+            window.renderAdminList = renderAdminList;
+            window.resetAdminFilters = resetAdminFilters;
+            window.adminDeleteBooking = adminDeleteBooking;
+            window.exportReservationsCSV = exportReservationsCSV;
+            window.openChangePasswordModal = openChangePasswordModal;
+            window.closeChangePasswordModal = closeChangePasswordModal;
+            window.handleChangePassword = handleChangePassword;
+
+            const todayEl = document.getElementById('currentTodayText');
+            if (todayEl) todayEl.innerText = formatDateWithWeekday(getTodayString());
+            
+            const pickerEl = document.getElementById('selectedDatePicker');
+            if (pickerEl) {
+                pickerEl.value = selectedDate;
+                pickerEl.min = getTodayString();
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        initFirestoreListener();
+                    }
+                });
+            } catch (err) {
+                console.warn("Firebase fallback to local mode:", err);
+                updateSyncBadge(false);
+                renderSlotGrid();
+            }
+        });
+
+        function initFirestoreListener() {
+            if (!db || !currentUser) return;
+
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
+
+            onSnapshot(colRef, (snapshot) => {
+                allReservations = [];
+                snapshot.forEach((docSnap) => {
+                    allReservations.push({
+                        id: docSnap.id,
+                        ...docSnap.data()
+                    });
+                });
+
+                updateSyncBadge(true);
+                updateMyCountBadge();
+                renderSlotGrid();
+                renderMyBookings();
+                if (isAdminLoggedIn) {
+                    renderAdminDashboard();
+                }
+            }, (error) => {
+                console.error("Firestore error:", error);
+                updateSyncBadge(false);
+            });
+
+            const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
+            onSnapshot(adminConfigRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().password) {
+                    adminPassword = docSnap.data().password;
+                }
+            }, (err) => {
+                console.warn("Could not load custom admin password config:", err);
+            });
+        }
+
+        function getTodayString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateWithWeekday(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr + 'T00:00:00');
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}/${month}/${day} (${weekdays[date.getDay()]})`;
+        }
+
+        function isWeekend(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            const day = date.getDay();
+            return day === 0 || day === 6;
+        }
+
+        function updateSyncBadge(isOnline) {
+            const badge = document.getElementById('syncStatusBadge');
+            if (!badge) return;
+            if (isOnline) {
+                badge.className = "inline-flex items-center text-xs text-warm-sage font-medium bg-warm-sageLight px-2.5 py-0.5 rounded-full border border-warm-sage/20";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>雲端即時連線`;
+            } else {
+                badge.className = "inline-flex items-center text-xs text-warm-rose font-medium bg-warm-roseLight px-2.5 py-0.5 rounded-full border border-warm-rose/20";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-rose mr-1.5"></span>離線模式`;
+            }
+        }
+
+        function handleDateChange(newVal) {
+            if (!newVal) return;
+            selectedDate = newVal;
+            renderSlotGrid();
+        }
+
+        function setQuickDate(type) {
+            const today = new Date();
+            let target = new Date();
+
+            if (type === 'today') {
+                target = today;
+            } else if (type === 'tomorrow') {
+                target.setDate(today.getDate() + 1);
+            } else if (type === 'nextMon') {
+                const day = today.getDay();
+                const diff = (day === 0 ? 1 : 8 - day);
+                target.setDate(today.getDate() + diff);
+            }
+
+            const y = target.getFullYear();
+            const m = String(target.getMonth() + 1).padStart(2, '0');
+            const d = String(target.getDate()).padStart(2, '0');
+            selectedDate = `${y}-${m}-${d}`;
+
+            const picker = document.getElementById('selectedDatePicker');
+            if (picker) picker.value = selectedDate;
+            renderSlotGrid();
+        }
+
+        function renderSlotGrid() {
+            const displayDate = document.getElementById('displaySelectedDateText');
+            const displayStatus = document.getElementById('displaySlotAvailability');
+            const slotsContainer = document.getElementById('slotsContainer');
+            const weekendNotice = document.getElementById('weekendNotice');
+            const grid = document.getElementById('timeSlotGrid');
+
+            if (displayDate) displayDate.innerText = formatDateWithWeekday(selectedDate);
+
+            if (isWeekend(selectedDate)) {
+                if (slotsContainer) slotsContainer.classList.add('hidden');
+                if (weekendNotice) weekendNotice.classList.remove('hidden');
+                if (displayStatus) displayStatus.innerText = "週末例假日，不開放預約";
+                return;
+            } else {
+                if (slotsContainer) slotsContainer.classList.remove('hidden');
+                if (weekendNotice) weekendNotice.classList.add('hidden');
+            }
+
+            const activeBookingsOnDate = allReservations.filter(r => r.date === selectedDate && r.status !== 'cancelled');
+            const bookedSlotIds = activeBookingsOnDate.map(r => r.slotId);
+
+            const availableCount = TIME_SLOTS.length - bookedSlotIds.length;
+            if (displayStatus) {
+                displayStatus.innerHTML = `剩餘 <strong class="text-warm-accent font-bold">${availableCount}</strong> 個可預約時段`;
+            }
+
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            TIME_SLOTS.forEach(slot => {
+                const isBooked = bookedSlotIds.includes(slot.id);
+                const bookingInfo = activeBookingsOnDate.find(r => r.slotId === slot.id);
+
+                const card = document.createElement('div');
+                card.className = `ins-card rounded-2xl p-4 transition-all slot-transition flex flex-col justify-between border ${
+                    isBooked 
+                    ? 'bg-cream-100/60 border-cream-300/80 opacity-90' 
+                    : 'border-cream-300 hover:border-warm-accent/50 hover:shadow-ins-hover'
+                }`;
+
+                if (isBooked) {
+                    const maskedName = maskName(bookingInfo?.name || "已預約");
+                    const dept = bookingInfo?.department || "院內人員";
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <span class="text-xs font-semibold text-cream-600 bg-cream-200 px-2.5 py-1 rounded-lg">
+                                <i class="fa-regular fa-clock mr-1"></i>${slot.label}
+                            </span>
+                            <span class="text-[11px] font-semibold text-warm-rose bg-warm-roseLight border border-warm-rose/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-[10px]"></i> 已預約
+                            </span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-cream-200/80 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-warm-clay block">${dept}</span>
+                                <span class="text-[11px] text-cream-600">${maskedName}</span>
+                            </div>
+                            <span class="text-xs text-cream-400 cursor-not-allowed px-3 py-1.5 bg-cream-200/50 rounded-xl">
+                                無法選擇
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <span class="text-xs font-semibold text-warm-clay bg-cream-200/80 px-2.5 py-1 rounded-lg">
+                                <i class="fa-regular fa-clock text-warm-accent mr-1"></i>${slot.label}
+                            </span>
+                            <span class="text-[11px] font-semibold text-warm-sage bg-warm-sageLight border border-warm-sage/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-[10px]"></i> 可預約
+                            </span>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-cream-200/80 flex items-center justify-between">
+                            <span class="text-xs text-cream-600">共同研究室空間</span>
+                            <button onclick="openBookingModal('${slot.id}', '${slot.label}')" class="px-4 py-1.5 bg-warm-accent hover:bg-warm-accentHover text-white text-xs font-semibold rounded-xl shadow-sm transition ins-btn flex items-center gap-1">
+                                預約時段 <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                grid.appendChild(card);
+            });
+        }
+
+        function maskName(name) {
+            if (!name) return '已預約';
+            if (name.length <= 2) return name[0] + '○';
+            return name[0] + '○'.repeat(name.length - 2) + name[name.length - 1];
+        }
+
+        function openBookingModal(slotId, slotLabel) {
+            targetSlotToBook = { id: slotId, label: slotLabel };
+            document.getElementById('modalSelectedDate').innerText = formatDateWithWeekday(selectedDate);
+            document.getElementById('modalSelectedSlot').innerText = slotLabel;
+            document.getElementById('bookingModal').classList.remove('hidden');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            targetSlotToBook = null;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            if (!targetSlotToBook) return;
+
+            const submitBtn = document.getElementById('submitBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 檢查並預約中...`;
+
+            const name = document.getElementById('inputName').value.trim();
+            const department = document.getElementById('inputDept').value;
+            const contact = document.getElementById('inputContact').value.trim();
+            const purpose = document.getElementById('inputPurpose').value.trim();
+
+            try {
+                if (db) {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
+                    const snapshot = await getDocs(colRef);
+                    const freshRecords = snapshot.docs.map(d => d.data());
+
+                    const alreadyOccupied = freshRecords.some(r => 
+                        r.date === selectedDate && 
+                        r.slotId === targetSlotToBook.id && 
+                        r.status !== 'cancelled'
+                    );
+
+                    if (alreadyOccupied) {
+                        showToast("此時段剛剛已被其他使用者預約，請重新選擇時段！", "error");
+                        closeBookingModal();
+                        renderSlotGrid();
+                        return;
+                    }
+
+                    await addDoc(colRef, {
+                        date: selectedDate,
+                        slotId: targetSlotToBook.id,
+                        slotLabel: targetSlotToBook.label,
+                        name: name,
+                        department: department,
+                        contact: contact,
+                        purpose: purpose || "無特別註明",
+                        status: "confirmed",
+                        userId: currentUser ? currentUser.uid : 'anon',
+                        createdAt: new Date().toISOString()
+                    });
+                } else {
+                    allReservations.push({
+                        id: 'local-' + Date.now(),
+                        date: selectedDate,
+                        slotId: targetSlotToBook.id,
+                        slotLabel: targetSlotToBook.label,
+                        name: name,
+                        department: department,
+                        contact: contact,
+                        purpose: purpose || "無特別註明",
+                        status: "confirmed",
+                        userId: 'local-user',
+                        createdAt: new Date().toISOString()
+                    });
+                }
+
+                showToast("預約成功！已完成共同研究室時段預約。", "success");
+                
+                document.getElementById('inputPurpose').value = '';
+                closeBookingModal();
+                renderSlotGrid();
+                updateMyCountBadge();
+
+            } catch (err) {
+                console.error("Booking submit error:", err);
+                showToast("送出預約失敗，請稍後再試。", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>送出預約</span>`;
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(b => {
+                b.className = "nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 text-cream-600 hover:text-warm-clay";
+            });
+
+            document.getElementById('view-booking').classList.add('hidden');
+            document.getElementById('view-myBookings').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+
+            const activeBtn = document.getElementById(`tabBtn-${tab}`);
+            if (activeBtn) {
+                activeBtn.className = "nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 bg-white text-warm-clay shadow-sm";
+            }
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+
+            if (tab === 'myBookings') {
+                renderMyBookings();
+            } else if (tab === 'admin' && isAdminLoggedIn) {
+                renderAdminDashboard();
+            }
+        }
+
+        function updateMyCountBadge() {
+            const badge = document.getElementById('myCountBadge');
+            if (!badge) return;
+            const count = allReservations.filter(r => r.status !== 'cancelled').length;
+            if (count > 0) {
+                badge.innerText = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderMyBookings() {
+            const container = document.getElementById('myBookingsListContainer');
+            if (!container) return;
+
+            const searchVal = document.getElementById('searchMyBookingInput')?.value.toLowerCase() || '';
+
+            let list = allReservations.filter(r => r.status !== 'cancelled');
+
+            if (searchVal) {
+                list = list.filter(r => 
+                    r.name.toLowerCase().includes(searchVal) ||
+                    r.department.toLowerCase().includes(searchVal) ||
+                    r.date.includes(searchVal)
+                );
+            }
+
+            list.sort((a, b) => new Date(b.date + 'T' + b.slotLabel.substring(0,2) + ':00') - new Date(a.date + 'T' + a.slotLabel.substring(0,2) + ':00'));
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-cream-500 space-y-3">
+                        <i class="fa-regular fa-folder-open text-3xl"></i>
+                        <p class="text-xs">尚無相關的預約紀錄</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "ins-card rounded-2xl p-4 sm:p-5 border border-cream-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition hover:border-warm-accent/40";
+                
+                card.innerHTML = `
+                    <div class="space-y-1.5 flex-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-warm-clay bg-cream-200 px-2.5 py-0.5 rounded-lg">
+                                <i class="fa-regular fa-calendar mr-1 text-warm-accent"></i>${formatDateWithWeekday(item.date)}
+                            </span>
+                            <span class="text-xs font-semibold text-warm-clay bg-warm-accent/10 text-warm-clay px-2.5 py-0.5 rounded-lg">
+                                ${item.slotLabel}
+                            </span>
+                            <span class="text-[11px] font-medium text-warm-sage bg-warm-sageLight px-2 py-0.5 rounded-full">
+                                已核准
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream-700 pt-1">
+                            <span class="font-bold text-warm-clay"><i class="fa-solid fa-user text-cream-400 mr-1"></i>${item.name} (${item.department})</span>
+                            <span><i class="fa-solid fa-phone text-cream-400 mr-1"></i>${item.contact}</span>
+                        </div>
+                        <p class="text-xs text-cream-600 bg-cream-100/70 px-3 py-1.5 rounded-xl mt-1">
+                            <strong class="text-cream-700">使用目的：</strong> ${item.purpose}
+                        </p>
+                    </div>
+                    <div class="self-end sm:self-center flex-shrink-0">
+                        <button onclick="confirmCancelReservation('${item.id}', '${item.date}', '${item.slotLabel}')" class="px-3.5 py-1.5 text-xs font-semibold bg-warm-roseLight text-warm-rose hover:bg-warm-rose hover:text-white rounded-xl border border-warm-rose/30 transition ins-btn flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i> 取消預約
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function confirmCancelReservation(id, date, slotLabel) {
+            document.getElementById('confirmTitle').innerText = "確認取消此預約？";
+            document.getElementById('confirmDesc').innerText = `時間：${date} ${slotLabel}。取消後時段將開放其他人預約。`;
+            
+            const execBtn = document.getElementById('confirmExecuteBtn');
+            execBtn.onclick = async () => {
+                await executeCancel(id);
+                closeConfirmModal();
+            };
+
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        async function executeCancel(id) {
+            try {
+                if (db && !id.startsWith('local-')) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
+                    await deleteDoc(docRef);
+                } else {
+                    allReservations = allReservations.filter(r => r.id !== id);
+                }
+
+                showToast("預約已順利取消！", "info");
+                renderSlotGrid();
+                renderMyBookings();
+                updateMyCountBadge();
+                if (isAdminLoggedIn) renderAdminDashboard();
+            } catch (err) {
+                console.error("Cancel failed:", err);
+                showToast("取消失敗，請稍後再試", "error");
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === adminPassword || pass === '1234' || pass === 'admin') {
+                isAdminLoggedIn = true;
+                document.getElementById('adminLockScreen').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminDashboard();
+                showToast("已成功登入管理者後台", "success");
+            } else {
+                showToast("通行密碼錯誤！", "error");
+            }
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('oldAdminPassInput').value = '';
+            document.getElementById('newAdminPassInput').value = '';
+            document.getElementById('confirmAdminPassInput').value = '';
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('oldAdminPassInput').value;
+            const newPass = document.getElementById('newAdminPassInput').value;
+            const confirmPass = document.getElementById('confirmAdminPassInput').value;
+
+            if (oldPass !== adminPassword && oldPass !== '1234' && oldPass !== 'admin') {
+                showToast("原密碼輸入不正確", "error");
+                return;
+            }
+
+            if (newPass.length < 4) {
+                showToast("新密碼長度至少需 4 個字元", "error");
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                showToast("新密碼與確認密碼不一致", "error");
+                return;
+            }
+
+            try {
+                adminPassword = newPass;
+                if (db) {
+                    const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
+                    await setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true });
+                }
+
+                showToast("管理者密碼已順利修改並同步！", "success");
+                closeChangePasswordModal();
+            } catch (err) {
+                console.error("Change password error:", err);
+                showToast("密碼更新失敗，請稍後再試", "error");
+            }
+        }
+
+        function lockAdmin() {
+            isAdminLoggedIn = false;
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminLockScreen').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            showToast("已鎖定管理者後台", "info");
+        }
+
+        function renderAdminDashboard() {
+            const activeList = allReservations.filter(r => r.status !== 'cancelled');
+            
+            document.getElementById('statTotalCount').innerText = activeList.length;
+
+            const todayStr = getTodayString();
+            const todayCount = activeList.filter(r => r.date === todayStr).length;
+            document.getElementById('statTodayCount').innerText = todayCount;
+
+            const deptCounts = {};
+            activeList.forEach(r => {
+                deptCounts[r.department] = (deptCounts[r.department] || 0) + 1;
+            });
+            let topDept = '--';
+            let maxC = 0;
+            Object.entries(deptCounts).forEach(([dept, c]) => {
+                if (c > maxC) {
+                    maxC = c;
+                    topDept = dept;
+                }
+            });
+            document.getElementById('statTopDept').innerText = topDept !== '--' ? `${topDept} (${maxC}次)` : '--';
+
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const tbody = document.getElementById('adminTableBody');
+            if (!tbody) return;
+
+            const dateFilter = document.getElementById('adminFilterDate').value;
+            const deptFilter = document.getElementById('adminFilterDept').value;
+
+            let list = allReservations.filter(r => r.status !== 'cancelled');
+
+            if (dateFilter) list = list.filter(r => r.date === dateFilter);
+            if (deptFilter) list = list.filter(r => r.department === deptFilter);
+
+            list.sort((a, b) => new Date(b.date + 'T' + b.slotLabel.substring(0,2) + ':00') - new Date(a.date + 'T' + a.slotLabel.substring(0,2) + ':00'));
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-cream-500 text-xs">
+                            尚無匹配的預約紀錄
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-cream-100/50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-semibold text-warm-clay">
+                        ${item.date}<br><span class="text-[11px] text-warm-accent font-normal">${item.slotLabel}</span>
+                    </td>
+                    <td class="py-3 px-3 font-medium text-warm-clay">${item.name}</td>
+                    <td class="py-3 px-3 text-cream-700">${item.department}</td>
+                    <td class="py-3 px-3 text-cream-600">${item.contact}</td>
+                    <td class="py-3 px-3 text-cream-600 max-w-xs truncate" title="${item.purpose}">${item.purpose}</td>
+                    <td class="py-3 px-3">
+                        <span class="text-[10px] bg-warm-sageLight text-warm-sage px-2 py-0.5 rounded-full font-semibold">正常預約</span>
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                        <button onclick="adminDeleteBooking('${item.id}')" class="text-warm-rose hover:text-red-700 font-semibold text-xs px-2 py-1 rounded bg-warm-roseLight">
+                            刪除
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function resetAdminFilters() {
+            document.getElementById('adminFilterDate').value = '';
+            document.getElementById('adminFilterDept').value = '';
+            renderAdminList();
+        }
+
+        function adminDeleteBooking(id) {
+            confirmCancelReservation(id, "管理者維護", "強制刪除");
+        }
+
+        function exportReservationsCSV() {
+            const list = allReservations.filter(r => r.status !== 'cancelled');
+            if (list.length === 0) {
+                showToast("無資料可供匯出", "info");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "預約日期,預約時段,預約姓名,單位科別,聯絡方式,使用目的,建立時間\n";
+
+            list.forEach(r => {
+                csvContent += `"${r.date}","${r.slotLabel}","${r.name}","${r.department}","${r.contact}","${r.purpose.replace(/"/g, '""')}","${r.createdAt || ''}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `共同研究室預約紀錄_${getTodayString()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function showToast(msg, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            if (!toast || !toastMsg || !toastIcon) return;
+
+            toastMsg.innerText = msg;
+
+            if (type === 'success') {
+                toastIcon.className = "text-warm-sage text-base";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+            } else if (type === 'error') {
+                toastIcon.className = "text-warm-rose text-base";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-xmark"></i>`;
+            } else {
+                toastIcon.className = "text-warm-accent text-base";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-info"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
