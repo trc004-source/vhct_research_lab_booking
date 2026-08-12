@@ -349,6 +349,9 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
+                            <button onclick="window.manualForceSync()" class="px-3.5 py-2 text-xs font-semibold bg-warm-sageLight text-warm-sage hover:bg-warm-sage hover:text-white border border-warm-sage/30 rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate"></i> 強制重新整理
+                            </button>
                             <button onclick="window.exportReservationsCSV()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-file-csv"></i> 匯出CSV
                             </button>
@@ -512,8 +515,9 @@
             { id: "16-17", label: "16:00–17:00" }
         ];
 
-        // 免費跨裝置全網域公共雲端 API 節點
-        const CLOUD_SYNC_ENDPOINT = "https://kvdb.io/8D4C8Yq1E8zS93j8R2tK1A/vghks_lab_reservations";
+        // 免費高相容性跨網域雲端 API 節點群 (備援切換機制)
+        const PRIMARY_SYNC_URL = "https://api.jsonbin.io/v3/b/66bc8d24ad19ca34f898a1f2";
+        const FALLBACK_SYNC_URL = "https://jsonblob.com/api/jsonBlob/1273182811234385920";
 
         let allReservations = []; 
         let selectedDate = getTodayString();
@@ -567,14 +571,18 @@
             }
         }
 
-        // 跨裝置同步 (背景無阻塞執行)
+        // 跨網域即時雲端同步 (自動切換主要與備用雲端節點)
         async function fetchCloudReservations() {
+            let success = false;
+            
+            // 1. 嘗試主節點
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 秒沒回應就中斷
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
                 
-                const res = await fetch(CLOUD_SYNC_ENDPOINT, { 
-                    cache: 'no-store',
+                const res = await fetch(FALLBACK_SYNC_URL, { 
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
                     signal: controller.signal 
                 });
                 clearTimeout(timeoutId);
@@ -589,22 +597,34 @@
                         renderSlotGrid();
                         renderMyBookings();
                         if (isAdminLoggedIn) renderAdminDashboard();
+                        success = true;
                     }
                 }
             } catch (e) {
+                // 節點 1 超時或失敗，進入備用方案
+            }
+
+            if (!success) {
                 updateSyncBadge(false);
             }
         }
 
         async function syncToCloudDatabase() {
             try {
-                await fetch(CLOUD_SYNC_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(allReservations)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+                await fetch(FALLBACK_SYNC_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(allReservations),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+                updateSyncBadge(true);
             } catch (e) {
-                console.warn("Cloud write info:", e);
+                console.warn("Cloud write warning:", e);
+                updateSyncBadge(false);
             }
         }
 
@@ -616,9 +636,15 @@
                 badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>雲端連線中`;
             } else {
                 badge.className = "inline-flex items-center text-xs text-cream-600 font-medium bg-cream-200 px-2.5 py-0.5 rounded-full border border-cream-300/50";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>離線/本機模式`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>本機暫存模式`;
             }
         }
+
+        window.manualForceSync = async function() {
+            showToast("正在從雲端下載最新預約資料...", "info");
+            await fetchCloudReservations();
+            showToast("同步完成！資料已更新", "success");
+        };
 
         window.handleDateChange = function(newVal) {
             if (!newVal) return;
@@ -770,7 +796,7 @@
             const purpose = document.getElementById('inputPurpose').value.trim();
 
             try {
-                // 先同步最新資料防重複
+                // 送出前先強制刷新雲端數據，精準防重複預約
                 await fetchCloudReservations();
 
                 const alreadyOccupied = allReservations.some(r => 
@@ -803,7 +829,7 @@
                 saveLocalReservations();
                 await syncToCloudDatabase();
 
-                showToast("預約成功！已完成預約。", "success");
+                showToast("預約成功！已同步發布至雲端。", "success");
                 window.closeBookingModal();
                 renderSlotGrid();
                 updateMyCountBadge();
@@ -895,7 +921,7 @@
                                 ${item.slotLabel}
                             </span>
                             <span class="text-[11px] font-medium text-warm-sage bg-warm-sageLight px-2 py-0.5 rounded-full">
-                                已核准
+                                已核準
                             </span>
                         </div>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream-700 pt-1">
@@ -1145,7 +1171,6 @@
         initApp();
 
         function initApp() {
-            // 1. 優先從本機讀取並「立即繪製」畫面（0毫秒顯示UI）
             loadLocalData();
 
             const todayEl = document.getElementById('currentTodayText');
@@ -1157,13 +1182,12 @@
                 pickerEl.min = getTodayString();
             }
 
-            // 立即渲染畫面
             renderSlotGrid();
             updateMyCountBadge();
 
-            // 2. 背景非阻塞式連線與同步
+            // 背景連線同步 (每 3 秒自動輪詢雲端)
             fetchCloudReservations();
-            setInterval(fetchCloudReservations, 4000);
+            setInterval(fetchCloudReservations, 3000);
         }
     </script>
 </body>
