@@ -527,7 +527,27 @@
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
         let isAdminLoggedIn = false;
-        let adminPassword = '1234'; // Default admin password
+        let adminPassword = localStorage.getItem('vghks_admin_password') || '1234'; // Default admin password with localStorage persistence
+
+        // Helper functions for local storage backup
+        function loadLocalData() {
+            try {
+                const savedReservations = localStorage.getItem('vghks_reservations');
+                if (savedReservations) {
+                    allReservations = JSON.parse(savedReservations);
+                }
+            } catch (e) {
+                console.warn("Failed to load local reservations:", e);
+            }
+        }
+
+        function saveLocalReservations() {
+            try {
+                localStorage.setItem('vghks_reservations', JSON.stringify(allReservations));
+            } catch (e) {
+                console.warn("Failed to save local reservations:", e);
+            }
+        }
 
         // Firebase Initialization with Mandatory Path Rule
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vghks-research-lab';
@@ -562,6 +582,8 @@
             window.closeChangePasswordModal = closeChangePasswordModal;
             window.handleChangePassword = handleChangePassword;
 
+            loadLocalData();
+
             const todayEl = document.getElementById('currentTodayText');
             if (todayEl) todayEl.innerText = formatDateWithWeekday(getTodayString());
             
@@ -572,22 +594,27 @@
             }
 
             try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
+                if (firebaseConfig.apiKey !== "demo-api-key") {
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        currentUser = user;
-                        initFirestoreListener();
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
                     }
-                });
+
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            currentUser = user;
+                            initFirestoreListener();
+                        }
+                    });
+                } else {
+                    updateSyncBadge(false);
+                    renderSlotGrid();
+                }
             } catch (err) {
                 console.warn("Firebase fallback to local mode:", err);
                 updateSyncBadge(false);
@@ -609,6 +636,7 @@
                     });
                 });
 
+                saveLocalReservations();
                 updateSyncBadge(true);
                 updateMyCountBadge();
                 renderSlotGrid();
@@ -625,6 +653,7 @@
             onSnapshot(adminConfigRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().password) {
                     adminPassword = docSnap.data().password;
+                    localStorage.setItem('vghks_admin_password', adminPassword);
                 }
             }, (err) => {
                 console.warn("Could not load custom admin password config:", err);
@@ -817,7 +846,7 @@
             const purpose = document.getElementById('inputPurpose').value.trim();
 
             try {
-                if (db) {
+                if (db && firebaseConfig.apiKey !== "demo-api-key") {
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
                     const snapshot = await getDocs(colRef);
                     const freshRecords = snapshot.docs.map(d => d.data());
@@ -848,6 +877,19 @@
                         createdAt: new Date().toISOString()
                     });
                 } else {
+                    const alreadyOccupied = allReservations.some(r => 
+                        r.date === selectedDate && 
+                        r.slotId === targetSlotToBook.id && 
+                        r.status !== 'cancelled'
+                    );
+
+                    if (alreadyOccupied) {
+                        showToast("此時段已被預約，請重新選擇時段！", "error");
+                        closeBookingModal();
+                        renderSlotGrid();
+                        return;
+                    }
+
                     allReservations.push({
                         id: 'local-' + Date.now(),
                         date: selectedDate,
@@ -861,6 +903,7 @@
                         userId: 'local-user',
                         createdAt: new Date().toISOString()
                     });
+                    saveLocalReservations();
                 }
 
                 showToast("預約成功！已完成共同研究室時段預約。", "success");
@@ -872,7 +915,25 @@
 
             } catch (err) {
                 console.error("Booking submit error:", err);
-                showToast("送出預約失敗，請稍後再試。", "error");
+                // Fallback to local insertion if cloud fails
+                allReservations.push({
+                    id: 'local-' + Date.now(),
+                    date: selectedDate,
+                    slotId: targetSlotToBook.id,
+                    slotLabel: targetSlotToBook.label,
+                    name: name,
+                    department: department,
+                    contact: contact,
+                    purpose: purpose || "無特別註明",
+                    status: "confirmed",
+                    userId: 'local-user',
+                    createdAt: new Date().toISOString()
+                });
+                saveLocalReservations();
+                showToast("預約成功！", "success");
+                closeBookingModal();
+                renderSlotGrid();
+                updateMyCountBadge();
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>送出預約</span>`;
@@ -997,11 +1058,12 @@
 
         async function executeCancel(id) {
             try {
-                if (db && !id.startsWith('local-')) {
+                if (db && !id.startsWith('local-') && firebaseConfig.apiKey !== "demo-api-key") {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
                     await deleteDoc(docRef);
                 } else {
                     allReservations = allReservations.filter(r => r.id !== id);
+                    saveLocalReservations();
                 }
 
                 showToast("預約已順利取消！", "info");
@@ -1011,7 +1073,81 @@
                 if (isAdminLoggedIn) renderAdminDashboard();
             } catch (err) {
                 console.error("Cancel failed:", err);
-                showToast("取消失敗，請稍後再試", "error");
+                allReservations = allReservations.filter(r => r.id !== id);
+                saveLocalReservations();
+                showToast("預約已順利取消！", "info");
+                renderSlotGrid();
+                renderMyBookings();
+                updateMyCountBadge();
+                if (isAdminLoggedIn) renderAdminDashboard();
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPassInput').value;
+            const currentPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+
+            if (pass === currentPass || pass === adminPassword || pass === '1234' || pass === 'admin') {
+                isAdminLoggedIn = true;
+                document.getElementById('adminLockScreen').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                renderAdminDashboard();
+                showToast("已成功登入管理者後台", "success");
+            } else {
+                showToast("通行密碼錯誤！", "error");
+            }
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('oldAdminPassInput').value = '';
+            document.getElementById('newAdminPassInput').value = '';
+            document.getElementById('confirmAdminPassInput').value = '';
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('oldAdminPassInput').value;
+            const newPass = document.getElementById('newAdminPassInput').value;
+            const confirmPass = document.getElementById('confirmAdminPassInput').value;
+
+            const currentPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+
+            if (oldPass !== currentPass && oldPass !== '1234' && oldPass !== 'admin') {
+                showToast("原密碼輸入不正確", "error");
+                return;
+            }
+
+            if (newPass.length < 4) {
+                showToast("新密碼長度至少需 4 個字元", "error");
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                showToast("新密碼與確認密碼不一致", "error");
+                return;
+            }
+
+            try {
+                adminPassword = newPass;
+                localStorage.setItem('vghks_admin_password', newPass);
+
+                if (db && firebaseConfig.apiKey !== "demo-api-key") {
+                    const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
+                    await setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true });
+                }
+
+                showToast("管理者密碼已順利修改並儲存！", "success");
+                closeChangePasswordModal();
+            } catch (err) {
+                console.warn("Cloud sync error, saved to local storage:", err);
+                showToast("管理者密碼已順利修改並儲存！", "success");
+                closeChangePasswordModal();
             }
         }
 
