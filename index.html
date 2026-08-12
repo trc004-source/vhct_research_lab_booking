@@ -603,18 +603,18 @@
         }
 
         async function initAuthAndFirestore() {
-            // Attempt optional background auth without blocking Firestore execution
+            // 確保先完成 Firebase 身份驗證，再建立雲端即時監聽 (Rule 3)
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token).catch(() => {});
+                    await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    await signInAnonymously(auth).catch(() => {});
+                    await signInAnonymously(auth);
                 }
             } catch (e) {
-                console.warn("Auth step bypassed:", e);
+                console.warn("Auth step warning:", e);
             }
 
-            // Realtime Snapshot Listener directly connected to Firestore
+            // Realtime Snapshot Listener: 預約紀錄即時全域同步
             try {
                 const resColRef = getReservationsCollectionRef();
                 onSnapshot(resColRef, (snapshot) => {
@@ -623,7 +623,7 @@
                         allReservations.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     
-                    updateSyncBadge(true); // Connected to Cloud
+                    updateSyncBadge(true); // 顯示連線成功
                     renderSlotGrid();
                     renderMyBookings();
                     updateMyCountBadge();
@@ -633,7 +633,7 @@
                     updateSyncBadge(false);
                 });
 
-                // Listen for Admin Config doc changes
+                // Realtime Snapshot Listener: 管理者設定與密碼即時全域同步
                 const settingsRef = getSettingsDocRef();
                 onSnapshot(settingsRef, (docSnap) => {
                     if (docSnap.exists() && docSnap.data().password) {
@@ -1020,18 +1020,31 @@
                 return;
             }
 
-            customAdminPassword = newPass;
-            localStorage.setItem('vghks_admin_password', newPass);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "儲存中...";
+            }
 
             try {
                 const settingsRef = getSettingsDocRef();
+                // 寫入 Google Firebase 雲端資料庫，實現跨電腦/裝置全域同步
                 await setDoc(settingsRef, { password: newPass, updatedAt: new Date().toISOString() });
-            } catch(err) {
-                console.warn("Cloud pass update warning:", err);
-            }
 
-            showToast("管理者密碼已成功變更並儲存至雲端！", "success");
-            window.closeChangePasswordModal();
+                customAdminPassword = newPass;
+                localStorage.setItem('vghks_admin_password', newPass);
+
+                showToast("管理者密碼已成功變更並同步至全院所有裝置！", "success");
+                window.closeChangePasswordModal();
+            } catch(err) {
+                console.error("Cloud pass update error:", err);
+                showToast("雲端同步失敗，請檢查網路連線", "error");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "儲存密碼";
+                }
+            }
         };
 
         window.lockAdmin = function() {
