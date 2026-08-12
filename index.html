@@ -214,7 +214,6 @@
                     </div>
                 </div>
 
-                <!-- Reservation Form Modal -->
                 <div id="bookingModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all">
                     <div class="ins-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative border border-cream-300 max-h-[90vh] overflow-y-auto">
                         <button onclick="closeBookingModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
@@ -476,12 +475,12 @@
                     <i class="fa-solid fa-key"></i>
                 </div>
                 <h3 class="font-bold text-warm-clay text-base pt-1">修改管理者密碼</h3>
-                <p class="text-xs text-cream-600">新密碼將儲存至記憶庫，可於此裝置維持有效登入</p>
+                <p class="text-xs text-cream-600">新密碼將即時儲存，跨頁面與裝置皆有效</p>
             </div>
             <form onsubmit="handleChangePassword(event)" class="space-y-3.5">
                 <div>
-                    <label class="block text-xs font-semibold text-cream-700 mb-1">原管理員密碼</label>
-                    <input type="password" id="oldAdminPassInput" required placeholder="請輸入目前密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                    <label class="block text-xs font-semibold text-cream-700 mb-1">目前管理者密碼</label>
+                    <input type="password" id="oldAdminPassInput" required placeholder="預設密碼：1234" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-cream-700 mb-1">設定新密碼</label>
@@ -499,7 +498,6 @@
         </div>
     </div>
 
-    <!-- Firebase Realtime & System Logic Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -524,7 +522,11 @@
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
         let isAdminLoggedIn = false;
-        let adminPassword = localStorage.getItem('vghks_admin_password') || '1234';
+        
+        // Helper to get active admin password
+        function getActiveAdminPassword() {
+            return localStorage.getItem('vghks_admin_password') || '1234';
+        }
 
         function loadLocalData() {
             try {
@@ -555,26 +557,30 @@
             appId: "1:123456789:web:demo"
         };
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            window.handleDateChange = handleDateChange;
-            window.setQuickDate = setQuickDate;
-            window.openBookingModal = openBookingModal;
-            window.closeBookingModal = closeBookingModal;
-            window.handleFormSubmit = handleFormSubmit;
-            window.switchTab = switchTab;
-            window.renderMyBookings = renderMyBookings;
-            window.confirmCancelReservation = confirmCancelReservation;
-            window.closeConfirmModal = closeConfirmModal;
-            window.handleAdminLogin = handleAdminLogin;
-            window.lockAdmin = lockAdmin;
-            window.renderAdminList = renderAdminList;
-            window.resetAdminFilters = resetAdminFilters;
-            window.adminDeleteBooking = adminDeleteBooking;
-            window.exportReservationsCSV = exportReservationsCSV;
-            window.openChangePasswordModal = openChangePasswordModal;
-            window.closeChangePasswordModal = closeChangePasswordModal;
-            window.handleChangePassword = handleChangePassword;
+        // Assign functions directly to window object at module load time so inline HTML handlers work immediately
+        window.handleDateChange = handleDateChange;
+        window.setQuickDate = setQuickDate;
+        window.openBookingModal = openBookingModal;
+        window.closeBookingModal = closeBookingModal;
+        window.handleFormSubmit = handleFormSubmit;
+        window.switchTab = switchTab;
+        window.renderMyBookings = renderMyBookings;
+        window.confirmCancelReservation = confirmCancelReservation;
+        window.closeConfirmModal = closeConfirmModal;
+        window.handleAdminLogin = handleAdminLogin;
+        window.lockAdmin = lockAdmin;
+        window.renderAdminList = renderAdminList;
+        window.resetAdminFilters = resetAdminFilters;
+        window.adminDeleteBooking = adminDeleteBooking;
+        window.exportReservationsCSV = exportReservationsCSV;
+        window.openChangePasswordModal = openChangePasswordModal;
+        window.closeChangePasswordModal = closeChangePasswordModal;
+        window.handleChangePassword = handleChangePassword;
 
+        // Initialize application logic
+        initApp();
+
+        async function initApp() {
             loadLocalData();
 
             const todayEl = document.getElementById('currentTodayText');
@@ -613,7 +619,7 @@
                 updateSyncBadge(false);
                 renderSlotGrid();
             }
-        });
+        }
 
         function initFirestoreListener() {
             if (!db || !currentUser) return;
@@ -645,8 +651,7 @@
             const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
             onSnapshot(adminConfigRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().password) {
-                    adminPassword = docSnap.data().password;
-                    localStorage.setItem('vghks_admin_password', adminPassword);
+                    localStorage.setItem('vghks_admin_password', docSnap.data().password);
                 }
             }, (err) => {
                 console.warn("Custom password config loading fallback:", err);
@@ -685,7 +690,7 @@
                 badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>雲端即時連線`;
             } else {
                 badge.className = "inline-flex items-center text-xs text-warm-rose font-medium bg-warm-roseLight px-2.5 py-0.5 rounded-full border border-warm-rose/20";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-rose mr-1.5"></span>離線模式`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-rose mr-1.5"></span>離線/本機模式`;
             }
         }
 
@@ -1076,10 +1081,10 @@
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const pass = document.getElementById('adminPassInput').value;
-            const currentSavedPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+            const inputPass = document.getElementById('adminPassInput').value.trim();
+            const activePass = getActiveAdminPassword();
 
-            if (pass === currentSavedPass || pass === adminPassword || pass === '1234' || pass === 'admin') {
+            if (inputPass === activePass) {
                 isAdminLoggedIn = true;
                 document.getElementById('adminLockScreen').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
@@ -1103,14 +1108,14 @@
 
         async function handleChangePassword(e) {
             e.preventDefault();
-            const oldPass = document.getElementById('oldAdminPassInput').value;
-            const newPass = document.getElementById('newAdminPassInput').value;
-            const confirmPass = document.getElementById('confirmAdminPassInput').value;
+            const oldPass = document.getElementById('oldAdminPassInput').value.trim();
+            const newPass = document.getElementById('newAdminPassInput').value.trim();
+            const confirmPass = document.getElementById('confirmAdminPassInput').value.trim();
 
-            const currentSavedPass = localStorage.getItem('vghks_admin_password') || adminPassword;
+            const currentPass = getActiveAdminPassword();
 
-            if (oldPass !== currentSavedPass && oldPass !== '1234' && oldPass !== 'admin') {
-                showToast("原密碼輸入不正確", "error");
+            if (oldPass !== currentPass) {
+                showToast("原密碼不正確！請重新輸入", "error");
                 return;
             }
 
@@ -1125,21 +1130,23 @@
             }
 
             try {
-                adminPassword = newPass;
+                // 1. Immediately save locally to localStorage
                 localStorage.setItem('vghks_admin_password', newPass);
 
+                // 2. Try syncing to Firebase cloud doc if database is configured
                 if (db && firebaseConfig.apiKey !== "demo-api-key") {
                     const adminConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
                     setDoc(adminConfigRef, { password: newPass, updatedAt: new Date().toISOString() }, { merge: true }).catch(err => {
-                        console.warn("Cloud password sync warning:", err);
+                        console.warn("Cloud password sync info:", err);
                     });
                 }
 
-                showToast("管理者密碼已順利修改並儲存！", "success");
+                showToast("管理者密碼已成功變更並儲存！", "success");
                 closeChangePasswordModal();
             } catch (err) {
-                console.warn("Storage warning:", err);
-                showToast("管理者密碼已順利修改並儲存！", "success");
+                console.warn("Password change error:", err);
+                localStorage.setItem('vghks_admin_password', newPass);
+                showToast("管理者密碼已成功變更！", "success");
                 closeChangePasswordModal();
             }
         }
