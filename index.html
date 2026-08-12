@@ -520,13 +520,9 @@
             { id: "16-17", label: "16:00–17:00" }
         ];
 
-        // Global Firebase Config Resolution
+        // Global Firebase Config
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'vghks-research-lab-booking';
         
-        // =========================================================================
-        // 💡 提示：若要在 Vercel 啟動真正的跨裝置雲端同步，請將您在 Google Firebase
-        // 申請到的專屬 firebaseConfig 貼在下方區塊中即可！
-        // =========================================================================
         let firebaseConfig = {
             apiKey: "AIzaSyAQ0o-W_ArgP8eoWG8AD2JMt7PAlpXYG6k",
             authDomain: "vhct-research-lab.firebaseapp.com",
@@ -551,14 +547,13 @@
         const db = getFirestore(app);
 
         // State variables
-        let currentUser = null;
         let allReservations = []; 
         let customAdminPassword = null;
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
         let isAdminLoggedIn = false;
 
-        // Firebase Path Rule Helper (RULE 1)
+        // Firebase Path Helper
         function getReservationsCollectionRef() {
             return collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
         }
@@ -608,24 +603,19 @@
         }
 
         async function initAuthAndFirestore() {
+            // Attempt optional background auth without blocking Firestore execution
             try {
-                // RULE 3: Auth Before Queries
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        const credential = await signInWithCustomToken(auth, __initial_auth_token);
-                        currentUser = credential.user;
-                    } catch(e) {
-                        const credential = await signInAnonymously(auth);
-                        currentUser = credential.user;
-                    }
+                    await signInWithCustomToken(auth, __initial_auth_token).catch(() => {});
                 } else {
-                    const credential = await signInAnonymously(auth);
-                    currentUser = credential.user;
+                    await signInAnonymously(auth).catch(() => {});
                 }
+            } catch (e) {
+                console.warn("Auth step bypassed:", e);
+            }
 
-                updateSyncBadge(true);
-
-                // Setup Realtime Document Snapshot Listener
+            // Realtime Snapshot Listener directly connected to Firestore
+            try {
                 const resColRef = getReservationsCollectionRef();
                 onSnapshot(resColRef, (snapshot) => {
                     allReservations = [];
@@ -633,7 +623,7 @@
                         allReservations.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     
-                    updateSyncBadge(true);
+                    updateSyncBadge(true); // Connected to Cloud
                     renderSlotGrid();
                     renderMyBookings();
                     updateMyCountBadge();
@@ -653,7 +643,7 @@
                 }, (err) => console.warn("Admin config listener err:", err));
 
             } catch (err) {
-                console.warn("Firebase Auth Error:", err);
+                console.warn("Firestore setup error:", err);
                 updateSyncBadge(false);
             }
         }
@@ -811,15 +801,13 @@
                 const docId = `${selectedDate}_${targetSlotToBook.id}`;
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
 
-                // Anti-Collision Atomic Check
-                if (currentUser) {
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists() && docSnap.data().status !== 'cancelled') {
-                        showToast("此時段剛剛已被其他使用者預約！", "error");
-                        window.closeBookingModal();
-                        renderSlotGrid();
-                        return;
-                    }
+                // Anti-Collision Atomic Check directly in Cloud
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && docSnap.data().status !== 'cancelled') {
+                    showToast("此時段剛剛已被其他使用者預約！", "error");
+                    window.closeBookingModal();
+                    renderSlotGrid();
+                    return;
                 }
 
                 const newBookingData = {
@@ -834,12 +822,7 @@
                     createdAt: new Date().toISOString()
                 };
 
-                if (currentUser) {
-                    await setDoc(docRef, newBookingData);
-                } else {
-                    // Local fallback
-                    allReservations.push({ id: docId, ...newBookingData });
-                }
+                await setDoc(docRef, newBookingData);
 
                 showToast("預約成功！已即時同步至全院所有裝置。", "success");
                 window.closeBookingModal();
@@ -848,8 +831,7 @@
 
             } catch (err) {
                 console.error("Booking error:", err);
-                showToast("預約處理完畢", "info");
-                window.closeBookingModal();
+                showToast("預約寫入失敗，請確認網路連線", "error");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>送出預約</span>`;
@@ -974,12 +956,8 @@
 
         async function executeCancel(id) {
             try {
-                if (currentUser) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
-                    await deleteDoc(docRef);
-                } else {
-                    allReservations = allReservations.filter(r => r.id !== id);
-                }
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
+                await deleteDoc(docRef);
 
                 showToast("預約已順利取消！", "info");
                 renderSlotGrid();
@@ -1045,13 +1023,11 @@
             customAdminPassword = newPass;
             localStorage.setItem('vghks_admin_password', newPass);
 
-            if (currentUser) {
-                try {
-                    const settingsRef = getSettingsDocRef();
-                    await setDoc(settingsRef, { password: newPass, updatedAt: new Date().toISOString() });
-                } catch(err) {
-                    console.warn("Cloud pass update warning:", err);
-                }
+            try {
+                const settingsRef = getSettingsDocRef();
+                await setDoc(settingsRef, { password: newPass, updatedAt: new Date().toISOString() });
+            } catch(err) {
+                console.warn("Cloud pass update warning:", err);
             }
 
             showToast("管理者密碼已成功變更並儲存至雲端！", "success");
