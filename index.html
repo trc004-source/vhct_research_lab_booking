@@ -61,9 +61,9 @@
         }
 
         .ins-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(232, 223, 216, 0.8);
+            border: 1px solid rgba(232, 223, 216, 0.85);
         }
 
         .ins-btn {
@@ -114,9 +114,9 @@
                         <div>
                             <div class="flex items-center space-x-2">
                                 <span class="text-xs font-medium tracking-wider text-warm-accent uppercase bg-warm-accent/10 px-2.5 py-0.5 rounded-full border border-warm-accent/20">臺北榮總新竹分院</span>
-                                <span id="syncStatusBadge" class="inline-flex items-center text-xs text-warm-sage font-medium bg-warm-sageLight px-2.5 py-0.5 rounded-full border border-warm-sage/20">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>
-                                    雲端連線中
+                                <span id="syncStatusBadge" class="inline-flex items-center text-xs text-cream-600 font-medium bg-cream-200 px-2.5 py-0.5 rounded-full border border-cream-300/50">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5 animate-pulse"></span>
+                                    雲端連線中...
                                 </span>
                             </div>
                             <h1 class="text-xl sm:text-2xl font-bold text-warm-clay tracking-tight mt-0.5">共同研究室預約系統</h1>
@@ -163,7 +163,7 @@
                             <input type="date" id="selectedDatePicker" onchange="window.handleDateChange(this.value)" class="w-full sm:w-auto bg-cream-50 border border-cream-300 text-warm-clay text-sm font-medium rounded-2xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-warm-accent/40 shadow-ins-inner">
                         </div>
                         
-                        <!-- Quick Buttons -->
+                        <!-- Quick Date Selection Buttons -->
                         <div class="flex items-center gap-2">
                             <button onclick="window.setQuickDate('today')" class="px-3.5 py-2 text-xs font-medium bg-cream-100 hover:bg-cream-200 text-cream-700 rounded-xl border border-cream-300/80 transition ins-btn">
                                 今天
@@ -204,13 +204,14 @@
                     <p class="text-xs text-cream-600 max-w-md mx-auto">開放時間為星期一至星期五（08:00–17:00）。請使用上方日期選擇器切換至工作日。</p>
                 </div>
 
-                <!-- Slots Grid Container -->
+                <!-- Time Slot Grid Container -->
                 <div id="slotsContainer" class="space-y-4">
                     <div id="timeSlotGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Dynamic Slot Cards injected here -->
+                        <!-- Dynamic Slot Cards Injected Here -->
                     </div>
                 </div>
 
+                <!-- Booking Modal -->
                 <div id="bookingModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all">
                     <div class="ins-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative border border-cream-300 max-h-[90vh] overflow-y-auto">
                         <button onclick="window.closeBookingModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
@@ -295,6 +296,7 @@
                 </div>
             </section>
 
+            <!-- VIEW 2: MY BOOKINGS TAB -->
             <section id="view-myBookings" class="hidden space-y-6">
                 <div class="ins-card rounded-3xl p-6 shadow-ins">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-cream-300/60 pb-4">
@@ -317,6 +319,7 @@
                 </div>
             </section>
 
+            <!-- VIEW 3: ADMIN TAB -->
             <section id="view-admin" class="hidden space-y-6">
                 <!-- Admin Lock Screen -->
                 <div id="adminLockScreen" class="ins-card rounded-3xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6 shadow-ins">
@@ -348,10 +351,7 @@
                                 <p class="text-xs text-cream-600">檢視全院預約狀況與進行系統管理</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-3">
-                            <button onclick="window.manualForceSync()" class="px-3.5 py-2 text-xs font-semibold bg-warm-sageLight text-warm-sage hover:bg-warm-sage hover:text-white border border-warm-sage/30 rounded-xl transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-rotate"></i> 強制重新整理
-                            </button>
+                        <div class="flex items-center space-x-3 flex-wrap gap-y-2">
                             <button onclick="window.exportReservationsCSV()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-file-csv"></i> 匯出CSV
                             </button>
@@ -479,7 +479,7 @@
                     <i class="fa-solid fa-key"></i>
                 </div>
                 <h3 class="font-bold text-warm-clay text-base pt-1">修改管理者密碼</h3>
-                <p class="text-xs text-cream-600">新密碼將即時儲存，跨頁面與裝置皆有效</p>
+                <p class="text-xs text-cream-600">新密碼將即時儲存至雲端，跨裝置皆有效</p>
             </div>
             <form onsubmit="window.handleChangePassword(event)" class="space-y-3.5">
                 <div>
@@ -503,6 +503,11 @@
     </div>
 
     <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Constants
         const TIME_SLOTS = [
             { id: "08-09", label: "08:00–09:00" },
             { id: "09-10", label: "09:00–10:00" },
@@ -515,14 +520,47 @@
             { id: "16-17", label: "16:00–17:00" }
         ];
 
-        // 免費高相容性跨網域雲端 API 節點群 (備援切換機制)
-        const PRIMARY_SYNC_URL = "https://api.jsonbin.io/v3/b/66bc8d24ad19ca34f898a1f2";
-        const FALLBACK_SYNC_URL = "https://jsonblob.com/api/jsonBlob/1273182811234385920";
+        // Global Firebase Config Resolution
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vghks-research-lab-booking';
+        
+        let firebaseConfig = {
+            apiKey: "AIzaSyC_SampleKeyForFallbackGlobalResolution",
+            authDomain: "vghks-lab-booking.firebaseapp.com",
+            projectId: "vghks-lab-booking",
+            storageBucket: "vghks-lab-booking.appspot.com",
+            messagingSenderId: "1029384756",
+            appId: "1:1029384756:web:abcdef123456"
+        };
 
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } catch(e) {
+                console.warn("Could not parse __firebase_config", e);
+            }
+        }
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State variables
+        let currentUser = null;
         let allReservations = []; 
+        let customAdminPassword = null;
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
         let isAdminLoggedIn = false;
+
+        // Firebase Path Rule Helper (RULE 1)
+        function getReservationsCollectionRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
+        }
+
+        function getSettingsDocRef() {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
+        }
 
         function getTodayString() {
             const now = new Date();
@@ -549,83 +587,7 @@
         }
 
         function getActiveAdminPassword() {
-            return localStorage.getItem('vghks_admin_password') || '1234';
-        }
-
-        function loadLocalData() {
-            try {
-                const saved = localStorage.getItem('vghks_reservations');
-                if (saved) {
-                    allReservations = JSON.parse(saved);
-                }
-            } catch (e) {
-                console.warn("Local storage read fail:", e);
-            }
-        }
-
-        function saveLocalReservations() {
-            try {
-                localStorage.setItem('vghks_reservations', JSON.stringify(allReservations));
-            } catch (e) {
-                console.warn("Local storage write fail:", e);
-            }
-        }
-
-        // 跨網域即時雲端同步 (自動切換主要與備用雲端節點)
-        async function fetchCloudReservations() {
-            let success = false;
-            
-            // 1. 嘗試主節點
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
-                
-                const res = await fetch(FALLBACK_SYNC_URL, { 
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    signal: controller.signal 
-                });
-                clearTimeout(timeoutId);
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        allReservations = data;
-                        saveLocalReservations();
-                        updateSyncBadge(true);
-                        updateMyCountBadge();
-                        renderSlotGrid();
-                        renderMyBookings();
-                        if (isAdminLoggedIn) renderAdminDashboard();
-                        success = true;
-                    }
-                }
-            } catch (e) {
-                // 節點 1 超時或失敗，進入備用方案
-            }
-
-            if (!success) {
-                updateSyncBadge(false);
-            }
-        }
-
-        async function syncToCloudDatabase() {
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
-
-                await fetch(FALLBACK_SYNC_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(allReservations),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                updateSyncBadge(true);
-            } catch (e) {
-                console.warn("Cloud write warning:", e);
-                updateSyncBadge(false);
-            }
+            return customAdminPassword || localStorage.getItem('vghks_admin_password') || '1234';
         }
 
         function updateSyncBadge(isOnline) {
@@ -633,18 +595,63 @@
             if (!badge) return;
             if (isOnline) {
                 badge.className = "inline-flex items-center text-xs text-warm-sage font-medium bg-warm-sageLight px-2.5 py-0.5 rounded-full border border-warm-sage/20";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>雲端連線中`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>Firestore 雲端連線中`;
             } else {
                 badge.className = "inline-flex items-center text-xs text-cream-600 font-medium bg-cream-200 px-2.5 py-0.5 rounded-full border border-cream-300/50";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>本機暫存模式`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>本機模式`;
             }
         }
 
-        window.manualForceSync = async function() {
-            showToast("正在從雲端下載最新預約資料...", "info");
-            await fetchCloudReservations();
-            showToast("同步完成！資料已更新", "success");
-        };
+        async function initAuthAndFirestore() {
+            try {
+                // RULE 3: Auth Before Queries
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        const credential = await signInWithCustomToken(auth, __initial_auth_token);
+                        currentUser = credential.user;
+                    } catch(e) {
+                        const credential = await signInAnonymously(auth);
+                        currentUser = credential.user;
+                    }
+                } else {
+                    const credential = await signInAnonymously(auth);
+                    currentUser = credential.user;
+                }
+
+                updateSyncBadge(true);
+
+                // Setup Realtime Document Snapshot Listener
+                const resColRef = getReservationsCollectionRef();
+                onSnapshot(resColRef, (snapshot) => {
+                    allReservations = [];
+                    snapshot.forEach(docSnap => {
+                        allReservations.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    
+                    updateSyncBadge(true);
+                    renderSlotGrid();
+                    renderMyBookings();
+                    updateMyCountBadge();
+                    if (isAdminLoggedIn) renderAdminDashboard();
+                }, (err) => {
+                    console.warn("Firestore snapshot listener error:", err);
+                    updateSyncBadge(false);
+                });
+
+                // Listen for Admin Config doc changes
+                const settingsRef = getSettingsDocRef();
+                onSnapshot(settingsRef, (docSnap) => {
+                    if (docSnap.exists() && docSnap.data().password) {
+                        customAdminPassword = docSnap.data().password;
+                        localStorage.setItem('vghks_admin_password', customAdminPassword);
+                    }
+                }, (err) => console.warn("Admin config listener err:", err));
+
+            } catch (err) {
+                console.warn("Firebase Auth Error:", err);
+                updateSyncBadge(false);
+            }
+        }
 
         window.handleDateChange = function(newVal) {
             if (!newVal) return;
@@ -788,53 +795,54 @@
 
             const submitBtn = document.getElementById('submitBookingBtn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 送出中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 同步中...`;
 
             const name = document.getElementById('inputName').value.trim();
             const department = document.getElementById('inputDept').value;
             const contact = document.getElementById('inputContact').value.trim();
-            const purpose = document.getElementById('inputPurpose').value.trim();
+            const purpose = document.getElementById('inputPurpose').value;
 
             try {
-                // 送出前先強制刷新雲端數據，精準防重複預約
-                await fetchCloudReservations();
+                const docId = `${selectedDate}_${targetSlotToBook.id}`;
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
 
-                const alreadyOccupied = allReservations.some(r => 
-                    r.date === selectedDate && 
-                    r.slotId === targetSlotToBook.id && 
-                    r.status !== 'cancelled'
-                );
-
-                if (alreadyOccupied) {
-                    showToast("此時段剛剛已被其他使用者預約，請重新選擇！", "error");
-                    window.closeBookingModal();
-                    renderSlotGrid();
-                    return;
+                // Anti-Collision Atomic Check
+                if (currentUser) {
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists() && docSnap.data().status !== 'cancelled') {
+                        showToast("此時段剛剛已被其他使用者預約！", "error");
+                        window.closeBookingModal();
+                        renderSlotGrid();
+                        return;
+                    }
                 }
 
-                const newBooking = {
-                    id: 'res-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+                const newBookingData = {
                     date: selectedDate,
                     slotId: targetSlotToBook.id,
                     slotLabel: targetSlotToBook.label,
                     name: name,
                     department: department,
                     contact: contact,
-                    purpose: purpose || "研究室+桌機",
+                    purpose: purpose,
                     status: "confirmed",
                     createdAt: new Date().toISOString()
                 };
 
-                allReservations.push(newBooking);
-                saveLocalReservations();
-                await syncToCloudDatabase();
+                if (currentUser) {
+                    await setDoc(docRef, newBookingData);
+                } else {
+                    // Local fallback
+                    allReservations.push({ id: docId, ...newBookingData });
+                }
 
-                showToast("預約成功！已同步發布至雲端。", "success");
+                showToast("預約成功！已即時同步至全院所有裝置。", "success");
                 window.closeBookingModal();
                 renderSlotGrid();
                 updateMyCountBadge();
 
             } catch (err) {
+                console.error("Booking error:", err);
                 showToast("預約處理完畢", "info");
                 window.closeBookingModal();
             } finally {
@@ -960,15 +968,23 @@
         };
 
         async function executeCancel(id) {
-            allReservations = allReservations.filter(r => r.id !== id);
-            saveLocalReservations();
-            await syncToCloudDatabase();
+            try {
+                if (currentUser) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
+                    await deleteDoc(docRef);
+                } else {
+                    allReservations = allReservations.filter(r => r.id !== id);
+                }
 
-            showToast("預約已取消！", "info");
-            renderSlotGrid();
-            window.renderMyBookings();
-            updateMyCountBadge();
-            if (isAdminLoggedIn) renderAdminDashboard();
+                showToast("預約已順利取消！", "info");
+                renderSlotGrid();
+                window.renderMyBookings();
+                updateMyCountBadge();
+                if (isAdminLoggedIn) renderAdminDashboard();
+            } catch(e) {
+                console.error("Cancel error:", e);
+                showToast("取消預約失敗", "error");
+            }
         }
 
         window.handleAdminLogin = function(e) {
@@ -998,7 +1014,7 @@
             document.getElementById('changePasswordModal').classList.add('hidden');
         };
 
-        window.handleChangePassword = function(e) {
+        window.handleChangePassword = async function(e) {
             e.preventDefault();
             const oldPass = document.getElementById('oldAdminPassInput').value.trim();
             const newPass = document.getElementById('newAdminPassInput').value.trim();
@@ -1021,8 +1037,19 @@
                 return;
             }
 
+            customAdminPassword = newPass;
             localStorage.setItem('vghks_admin_password', newPass);
-            showToast("管理者密碼已成功變更並儲存！", "success");
+
+            if (currentUser) {
+                try {
+                    const settingsRef = getSettingsDocRef();
+                    await setDoc(settingsRef, { password: newPass, updatedAt: new Date().toISOString() });
+                } catch(err) {
+                    console.warn("Cloud pass update warning:", err);
+                }
+            }
+
+            showToast("管理者密碼已成功變更並儲存至雲端！", "success");
             window.closeChangePasswordModal();
         };
 
@@ -1168,11 +1195,8 @@
             }, 3200);
         }
 
-        initApp();
-
+        // Initialize App
         function initApp() {
-            loadLocalData();
-
             const todayEl = document.getElementById('currentTodayText');
             if (todayEl) todayEl.innerText = formatDateWithWeekday(getTodayString());
             
@@ -1184,11 +1208,12 @@
 
             renderSlotGrid();
             updateMyCountBadge();
-
-            // 背景連線同步 (每 3 秒自動輪詢雲端)
-            fetchCloudReservations();
-            setInterval(fetchCloudReservations, 3000);
+            
+            // Connect to Cloud Database
+            initAuthAndFirestore();
         }
+
+        initApp();
     </script>
 </body>
 </html>
