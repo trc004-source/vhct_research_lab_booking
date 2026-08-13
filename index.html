@@ -906,6 +906,9 @@
                 const card = document.createElement('div');
                 card.className = "ins-card rounded-2xl p-4 sm:p-5 border border-cream-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition hover:border-warm-accent/40";
                 
+                // 套用名字隱私保護遮罩
+                const maskedName = maskName(item.name);
+
                 card.innerHTML = `
                     <div class="space-y-1.5 flex-1">
                         <div class="flex items-center space-x-2">
@@ -920,7 +923,7 @@
                             </span>
                         </div>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream-700 pt-1">
-                            <span class="font-bold text-warm-clay"><i class="fa-solid fa-user text-cream-400 mr-1"></i>${item.name} (${item.department})</span>
+                            <span class="font-bold text-warm-clay"><i class="fa-solid fa-user text-cream-400 mr-1"></i>${maskedName} (${item.department})</span>
                             <span><i class="fa-solid fa-phone text-cream-400 mr-1"></i>${item.contact}</span>
                         </div>
                         <p class="text-xs text-cream-600 bg-cream-100/70 px-3 py-1.5 rounded-xl mt-1">
