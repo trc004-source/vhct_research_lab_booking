@@ -238,7 +238,7 @@
                                     <th class="p-3">時段</th>
                                     <th class="p-3">員工編號</th>
                                     <th class="p-3">科別</th>
-                                    <th class="p-3">聯絡電話</th>
+                                    <th class="p-3">分機</th>
                                     <th class="p-3">研究用途</th>
                                     <th class="p-3">狀態</th>
                                     <th class="p-3 text-right">操作</th>
@@ -308,8 +308,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">聯絡電話 / 分機 (必填)</label>
-                    <input type="text" id="bookContact" name="no_autofill_contact_num" required placeholder="例如：分機 1234 或 0912-345678" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">分機 (必填)</label>
+                    <input type="text" id="bookContact" name="no_autofill_contact_num" required placeholder="例如：1234" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
@@ -799,7 +799,7 @@
                     <div class="text-xs text-cream-800/80 space-y-1">
                         <p><strong>員工編號：</strong> ${maskEmpId(item.employeeId)}</p>
                         <p><strong>科別單位：</strong> ${item.department}</p>
-                        <p><strong>聯絡電話：</strong> ${item.contact}</p>
+                        <p><strong>分機：</strong> ${item.contact}</p>
                         ${item.purpose ? `<p><strong>用途：</strong> ${item.purpose}</p>` : ''}
                     </div>
                     <div class="pt-2 text-right">
@@ -1112,7 +1112,7 @@
                 return;
             }
 
-            let csvContent = "\uFEFF預約日期,時段,員工編號,單位科別,聯絡電話,研究用途,預約狀態\n";
+            let csvContent = "\uFEFF預約日期,時段,員工編號,單位科別,分機,研究用途,預約狀態\n";
             allRes.forEach(r => {
                 csvContent += `"${r.date}","${r.slotLabel}","${r.employeeId}","${r.department}","${r.contact}","${r.purpose || ''}","${r.status}"\n`;
             });
