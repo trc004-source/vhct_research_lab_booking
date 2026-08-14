@@ -206,13 +206,15 @@
                         <div class="flex items-center space-x-2">
                             <select id="adminDeptFilter" onchange="renderAdminTable()" class="px-3 py-1.5 border border-cream-200 rounded-xl text-xs focus:outline-none">
                                 <option value="ALL">全部科別</option>
-                                <option value="教學研究部">教學研究部</option>
-                                <option value="內科部">內科部</option>
-                                <option value="外科部">外科部</option>
-                                <option value="護理部">護理部</option>
                                 <option value="藥劑科">藥劑科</option>
-                                <option value="醫事檢驗科">醫事檢驗科</option>
-                                <option value="其他科室">其他科室</option>
+                                <option value="放射科">放射科</option>
+                                <option value="檢驗科">檢驗科</option>
+                                <option value="護理部">護理部</option>
+                                <option value="營養科">營養科</option>
+                                <option value="物理治療">物理治療</option>
+                                <option value="職能治療">職能治療</option>
+                                <option value="臨床心理">臨床心理</option>
+                                <option value="教研中心">教研中心</option>
                             </select>
                         </div>
                     </div>
@@ -269,25 +271,27 @@
             <form onsubmit="handleBookingSubmit(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填)</label>
-                    <input type="text" id="bookEmpId" required placeholder="例如：12345" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <input type="text" id="bookEmpId" required placeholder="請輸入員工編號" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">再次確認員工編號 (防呆核對)</label>
-                    <input type="text" id="bookEmpIdConfirm" required placeholder="請再次輸入員工編號" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <input type="text" id="bookEmpIdConfirm" required placeholder="請再次輸入員工編號" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">單位 / 科別 (必填)</label>
                     <select id="bookDepartment" required class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                         <option value="" disabled selected>請選擇科別</option>
-                        <option value="教學研究部">教學研究部</option>
-                        <option value="內科部">內科部</option>
-                        <option value="外科部">外科部</option>
-                        <option value="護理部">護理部</option>
                         <option value="藥劑科">藥劑科</option>
-                        <option value="醫事檢驗科">醫事檢驗科</option>
-                        <option value="其他科室">其他科室</option>
+                        <option value="放射科">放射科</option>
+                        <option value="檢驗科">檢驗科</option>
+                        <option value="護理部">護理部</option>
+                        <option value="營養科">營養科</option>
+                        <option value="物理治療">物理治療</option>
+                        <option value="職能治療">職能治療</option>
+                        <option value="臨床心理">臨床心理</option>
+                        <option value="教研中心">教研中心</option>
                     </select>
                 </div>
 
@@ -297,8 +301,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">研究用途簡述 (選填)</label>
-                    <textarea id="bookPurpose" rows="2" placeholder="請簡述使用目的或研究項目..." class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">研究用途 (必填)</label>
+                    <select id="bookPurpose" required class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <option value="" disabled selected>請選擇研究用途</option>
+                        <option value="研究室+桌機">研究室+桌機</option>
+                        <option value="研究室+筆電(含統計軟體)">研究室+筆電(含統計軟體)</option>
+                        <option value="耳機、麥克風">耳機、麥克風</option>
+                    </select>
                 </div>
 
                 <div class="pt-2 flex items-center justify-end space-x-3">
@@ -717,6 +726,11 @@
             const department = document.getElementById('bookDepartment').value;
             const contact = document.getElementById('bookContact').value.trim();
             const purpose = document.getElementById('bookPurpose').value.trim();
+
+            if (!/^[A-Z]\d{4}$/.test(empId)) {
+                showToast("員工編號輸入錯誤", "error");
+                return;
+            }
 
             if (empId !== empIdConfirm) {
                 showToast("兩次輸入的員工編號不一致，請再次確認！", "error");
