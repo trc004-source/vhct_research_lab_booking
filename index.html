@@ -21,37 +21,46 @@
                             200: '#E8DFD5',
                             300: '#D6C7B7',
                             800: '#5C4A3E',
-                            900: '#3D3027',
-            <form onsubmit="handleBookingSubmit(event)" class="space-y-4" autocomplete="off">
-                <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填)</label>
-                    <input type="text" id="bookEmpId" required placeholder="請輸入員工編號" autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
-                </div>
+                            900: '#3D3027'
+                        },
+                        accent: {
+                            olive: '#6B705C',
+                            terracotta: '#CB997E'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #FAF8F5;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D6C7B7;
+            border-radius: 8px;
+        }
+        .tab-active {
+            border-bottom: 2px solid #6B705C;
+            color: #6B705C !important;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-cream-900 bg-[#FAF8F5]">
 
-                <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">再次確認員工編號 (防呆核對)</label>
-                    <input type="text" id="bookEmpIdConfirm" required placeholder="請再次輸入員工編號" autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">單位 / 科別 (必填)</label>
-                    <select id="bookDepartment" required class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
-                        <option value="" disabled selected>請選擇科別</option>
-                        <option value="藥劑科">藥劑科</option>
-                        <option value="放射科">放射科</option>
-                        <option value="檢驗科">檢驗科</option>
-                        <option value="護理部">護理部</option>
-                        <option value="營養科">營養科</option>
-                        <option value="物理治療">物理治療</option>
-                        <option value="職能治療">職能治療</option>
-                        <option value="臨床心理">臨床心理</option>
-                        <option value="教研中心">教研中心</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">聯絡電話 / 分機 (必填)</label>
-                    <input type="text" id="bookContact" required placeholder="例如：分機 1234 或 0912-345678" autocomplete="off" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+    <header class="bg-white border-b border-cream-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-accent-olive/10 text-accent-olive flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-hospital-user"></i>
                 </div>
                 <div>
                     <h1 class="text-lg font-bold text-cream-800 leading-tight">臺北榮總新竹分院</h1>
@@ -138,7 +147,7 @@
                         <p class="text-xs text-cream-800/60 mt-0.5">請輸入員工編號查詢與管理個人的預約紀錄</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <input type="text" id="myEmpSearchInput" placeholder="輸入員工編號查詢..." class="px-4 py-2 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <input type="text" id="myEmpSearchInput" placeholder="輸入員工編號查詢..." autocomplete="off" class="px-4 py-2 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                         <button onclick="searchMyBookingsByEmp()" class="px-4 py-2 bg-accent-olive text-white rounded-xl text-sm font-medium hover:bg-accent-olive/90 transition">
                             <i class="fa-solid fa-magnifying-glass mr-1"></i> 查詢
                         </button>
@@ -162,14 +171,14 @@
                     <h3 class="text-xl font-bold text-cream-800">管理員登入</h3>
                     <p class="text-xs text-cream-800/60 mt-1">請使用 Firebase 管理員帳號登入</p>
                 </div>
-                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4" autocomplete="off">
                     <div>
                         <label class="block text-xs font-semibold text-cream-800 mb-1">管理員信箱</label>
-                        <input type="email" id="adminEmail" required placeholder="admin@vhct.gov.tw" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <input type="email" id="adminEmail" required placeholder="admin@vhct.gov.tw" autocomplete="off" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-cream-800 mb-1">密碼</label>
-                        <input type="password" id="adminPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <input type="password" id="adminPassword" required placeholder="••••••••" autocomplete="off" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                     </div>
                     <button type="submit" id="adminLoginBtn" class="w-full py-3 bg-accent-olive text-white font-semibold rounded-xl text-sm shadow-md hover:bg-accent-olive/90 transition">
                         登入後台
@@ -268,15 +277,15 @@
                 <p><strong>預約時段：</strong> <span id="modalSlot" class="text-accent-olive font-bold"></span></p>
             </div>
 
-            <form onsubmit="handleBookingSubmit(event)" class="space-y-4">
+            <form onsubmit="handleBookingSubmit(event)" class="space-y-4" autocomplete="off">
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填)</label>
-                    <input type="text" id="bookEmpId" required placeholder="請輸入員工編號" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <input type="text" id="bookEmpId" required placeholder="請輸入員工編號" autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">再次確認員工編號 (防呆核對)</label>
-                    <input type="text" id="bookEmpIdConfirm" required placeholder="請再次輸入員工編號" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <input type="text" id="bookEmpIdConfirm" required placeholder="請再次輸入員工編號" autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
@@ -297,7 +306,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-cream-800 mb-1">聯絡電話 / 分機 (必填)</label>
-                    <input type="text" id="bookContact" required placeholder="例如：分機 1234 或 0912-345678" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    <input type="text" id="bookContact" required placeholder="例如：分機 1234 或 0912-345678" autocomplete="off" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
                 <div>
@@ -318,6 +327,23 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal (Custom dialog replacing confirm()) -->
+    <div id="cancelConfirmModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-xl border border-cream-200 space-y-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-cream-800">確認取消預約？</h3>
+                <p class="text-xs text-cream-800/70 mt-1">取消後時段將重新開放給其他同仁預約。</p>
+            </div>
+            <div class="flex items-center justify-center space-x-3 pt-2">
+                <button onclick="closeCancelModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">再想想</button>
+                <button onclick="executeCancelBooking()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md hover:bg-rose-700 transition">確認取消</button>
+            </div>
         </div>
     </div>
 
@@ -358,7 +384,6 @@
             getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged 
         } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // Stored or Default Configuration
         const customApiKey = localStorage.getItem('vghks_custom_api_key') || "";
         const customProjectId = localStorage.getItem('vghks_custom_project_id') || "vhct-research-lab";
 
@@ -368,10 +393,9 @@
             projectId: customProjectId,
             storageBucket: `${customProjectId}.appspot.com`,
             messagingSenderId: "100000000000",
-            appId: `1:100000000000:web:abcdef123456`
+            appId: "1:100000000000:web:abcdef123456"
         };
 
-        // App state
         let app = null;
         let db = null;
         let auth = null;
@@ -382,6 +406,7 @@
         let auditLogs = [];
         let selectedDate = new Date().toISOString().split('T')[0];
         let targetSlotToBook = null;
+        let pendingCancelDocId = null;
         let rememberedEmpId = localStorage.getItem('vghks_emp_id') || '';
 
         const appId = "vhct-research-lab";
@@ -399,18 +424,22 @@
 
         window.onload = async () => {
             const dateInput = document.getElementById('dateSelect');
-            dateInput.value = selectedDate;
-            dateInput.min = selectedDate;
-            document.getElementById('myEmpSearchInput').value = rememberedEmpId;
+            if (dateInput) {
+                dateInput.value = selectedDate;
+                dateInput.min = selectedDate;
+            }
+            const empSearch = document.getElementById('myEmpSearchInput');
+            if (empSearch) empSearch.value = rememberedEmpId;
 
-            document.getElementById('cfgApiKey').value = customApiKey;
-            document.getElementById('cfgProjectId').value = customProjectId;
+            const cfgKey = document.getElementById('cfgApiKey');
+            if (cfgKey) cfgKey.value = customApiKey;
+            const cfgProj = document.getElementById('cfgProjectId');
+            if (cfgProj) cfgProj.value = customProjectId;
 
             await initFirebaseOrFallback();
         };
 
         async function initFirebaseOrFallback() {
-            // Check if API key is valid dummy format
             if (!customApiKey || customApiKey.includes("DummyKey")) {
                 enableFallbackMode("請設定有效 Firebase API Key（目前運行為展示備援模式）");
                 return;
@@ -421,7 +450,6 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Listen Auth
                 onAuthStateChanged(auth, async (user) => {
                     currentUser = user;
                     if (user) {
@@ -429,7 +457,6 @@
                     }
                 });
 
-                // Try anonymous signin
                 try {
                     const userCred = await signInAnonymously(auth);
                     currentUser = userCred.user;
@@ -451,9 +478,9 @@
         function enableFallbackMode(reason) {
             isFirebaseActive = false;
             updateSyncBadge(false, "展示備援模式");
-            document.getElementById('demoModeBanner').classList.remove('hidden');
+            const banner = document.getElementById('demoModeBanner');
+            if (banner) banner.classList.remove('hidden');
 
-            // Load local storage reservations
             const storedRes = localStorage.getItem('vghks_local_reservations');
             if (storedRes) {
                 try { reservations = JSON.parse(storedRes); } catch(e) { reservations = {}; }
@@ -461,7 +488,6 @@
                 reservations = {};
             }
 
-            // Load local logs
             const storedLogs = localStorage.getItem('vghks_local_audit_logs');
             if (storedLogs) {
                 try { auditLogs = JSON.parse(storedLogs); } catch(e) { auditLogs = []; }
@@ -475,14 +501,16 @@
         function updateSyncBadge(isOnline, text) {
             const badge = document.getElementById('syncStatus');
             const textEl = document.getElementById('syncStatusText');
-            textEl.innerText = text;
+            if (textEl) textEl.innerText = text;
 
-            if (isOnline) {
-                badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer";
-                badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> <span>${text}</span>`;
-            } else {
-                badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer";
-                badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-amber-400 animate-pulse"></span> <span>${text}</span>`;
+            if (badge) {
+                if (isOnline) {
+                    badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer";
+                    badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> <span>${text}</span>`;
+                } else {
+                    badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer";
+                    badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-amber-400 animate-pulse"></span> <span>${text}</span>`;
+                }
             }
         }
 
@@ -493,10 +521,10 @@
                 const resCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
                 onSnapshot(resCollectionRef, (snapshot) => {
                     reservations = {};
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
                         if (data.status === 'confirmed') {
-                            reservations[doc.id] = data;
+                            reservations[docSnap.id] = data;
                         }
                     });
 
@@ -529,8 +557,8 @@
                         return;
                     }
 
-                    snapshot.forEach(doc => {
-                        const log = doc.data();
+                    snapshot.forEach(docSnap => {
+                        const log = docSnap.data();
                         const item = document.createElement('div');
                         item.className = "flex items-start justify-between border-b border-cream-100 pb-1.5";
                         item.innerHTML = `
@@ -542,7 +570,7 @@
                         `;
                         listEl.appendChild(item);
                     });
-                }, (err) => {
+                }, () => {
                     renderLocalAuditLogs();
                 });
             } catch(e) {
@@ -582,7 +610,9 @@
 
         window.renderSlotGrid = function() {
             const grid = document.getElementById('slotGrid');
-            document.getElementById('currentDateDisplay').innerText = selectedDate;
+            const displayDate = document.getElementById('currentDateDisplay');
+            if (displayDate) displayDate.innerText = selectedDate;
+            if (!grid) return;
             grid.innerHTML = '';
 
             SLOTS.forEach(slot => {
@@ -624,7 +654,7 @@
 
                     <div>
                         ${isMine ? `
-                            <button onclick="cancelBooking('${docId}')" class="w-full py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold hover:bg-rose-100 transition">
+                            <button onclick="requestCancelBooking('${docId}')" class="w-full py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold hover:bg-rose-100 transition">
                                 取消預約
                             </button>
                         ` : isBooked ? `
@@ -645,9 +675,11 @@
 
         window.renderMyBookings = function() {
             const listEl = document.getElementById('myBookingsList');
+            if (!listEl) return;
             listEl.innerHTML = '';
 
-            const empSearch = document.getElementById('myEmpSearchInput').value.trim();
+            const searchInput = document.getElementById('myEmpSearchInput');
+            const empSearch = searchInput ? searchInput.value.trim() : '';
             
             const myBookings = Object.entries(reservations)
                 .map(([id, data]) => ({ id, ...data }))
@@ -658,7 +690,8 @@
                 })
                 .sort((a, b) => a.date.localeCompare(b.date));
 
-            document.getElementById('myCountBadge').innerText = myBookings.length;
+            const badge = document.getElementById('myCountBadge');
+            if (badge) badge.innerText = myBookings.length;
 
             if (myBookings.length === 0) {
                 listEl.innerHTML = `
@@ -685,7 +718,7 @@
                         ${item.purpose ? `<p><strong>用途：</strong> ${item.purpose}</p>` : ''}
                     </div>
                     <div class="pt-2 text-right">
-                        <button onclick="cancelBooking('${item.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold hover:bg-rose-100 transition">
+                        <button onclick="requestCancelBooking('${item.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold hover:bg-rose-100 transition">
                             取消預約
                         </button>
                     </div>
@@ -704,7 +737,6 @@
             document.getElementById('modalDate').innerText = selectedDate;
             document.getElementById('modalSlot').innerText = slotLabel;
             
-            // 清空所有表單輸入值，完全不自動帶入歷史資料
             document.getElementById('bookEmpId').value = '';
             document.getElementById('bookEmpIdConfirm').value = '';
             document.getElementById('bookDepartment').value = '';
@@ -787,7 +819,6 @@
                     closeBookingModal();
                 }
             } else {
-                // Fallback LocalStorage mode
                 if (reservations[docId] && reservations[docId].status === 'confirmed') {
                     showToast("該時段已被預約！", "error");
                 } else {
@@ -804,8 +835,20 @@
             }
         };
 
-        window.cancelBooking = async function(docId) {
-            if (!confirm("確定要取消此時段預約嗎？")) return;
+        window.requestCancelBooking = function(docId) {
+            pendingCancelDocId = docId;
+            document.getElementById('cancelConfirmModal').classList.remove('hidden');
+        };
+
+        window.closeCancelModal = function() {
+            pendingCancelDocId = null;
+            document.getElementById('cancelConfirmModal').classList.add('hidden');
+        };
+
+        window.executeCancelBooking = async function() {
+            if (!pendingCancelDocId) return;
+            const docId = pendingCancelDocId;
+            closeCancelModal();
 
             if (isFirebaseActive && db) {
                 try {
@@ -880,7 +923,6 @@
                     btn.innerText = "登入後台";
                 }
             } else {
-                // Demo Admin Login in Fallback Mode
                 isAdmin = true;
                 toggleAdminUI(true, email + " (展示後台)");
                 showToast("已登入展示管理員後台", "success");
@@ -903,18 +945,20 @@
             const panel = document.getElementById('adminPanel');
 
             if (isLoggedIn) {
-                loginForm.classList.add('hidden');
-                panel.classList.remove('hidden');
-                document.getElementById('adminUserDisplay').innerText = `已登入：${email}`;
+                if (loginForm) loginForm.classList.add('hidden');
+                if (panel) panel.classList.remove('hidden');
+                const userDisplay = document.getElementById('adminUserDisplay');
+                if (userDisplay) userDisplay.innerText = `已登入：${email}`;
                 renderAdminTable();
             } else {
-                loginForm.classList.remove('hidden');
-                panel.classList.add('hidden');
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (panel) panel.classList.add('hidden');
             }
         }
 
         window.renderAdminTable = function() {
             const tableBody = document.getElementById('adminTableBody');
+            if (!tableBody) return;
             tableBody.innerHTML = '';
 
             const deptFilter = document.getElementById('adminDeptFilter').value;
@@ -941,7 +985,7 @@
                     <td class="p-3 max-w-xs truncate">${item.purpose || '-'}</td>
                     <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">已確認</span></td>
                     <td class="p-3 text-right">
-                        <button onclick="cancelBooking('${item.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-semibold hover:bg-rose-100">
+                        <button onclick="requestCancelBooking('${item.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-semibold hover:bg-rose-100">
                             取消
                         </button>
                     </td>
@@ -1021,8 +1065,10 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
             document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
 
-            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
-            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            const activeTabBtn = document.getElementById(`tab-${tabName}`);
+            const activeSec = document.getElementById(`sec-${tabName}`);
+            if (activeTabBtn) activeTabBtn.classList.add('tab-active');
+            if (activeSec) activeSec.classList.remove('hidden');
 
             if (tabName === 'my-bookings') renderMyBookings();
             if (tabName === 'admin' && isAdmin) renderAdminTable();
@@ -1035,6 +1081,7 @@
 
         window.showToast = function(message, type = 'info') {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
             const toast = document.createElement('div');
             
             const bgColors = {
