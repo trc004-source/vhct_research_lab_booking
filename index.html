@@ -102,10 +102,10 @@
         <section id="sec-booking" class="tab-content space-y-6">
             <div id="demoModeBanner" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 flex items-center justify-between hidden">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
-                    <span>目前運行於<strong>【展示備援模式】</strong>（未連結有效 Firebase API Key）。預約操作將寫入瀏覽器快取。</span>
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i>
+                    <span>系統尚未寫入正式 API Key，請點擊右側設定或在 index.html 中填入金鑰以開啟全院跨裝置同步！</span>
                 </div>
-                <button onclick="openConfigModal()" class="px-3 py-1 bg-amber-200 hover:bg-amber-300 rounded-lg font-bold text-amber-900 transition">
+                <button onclick="openConfigModal()" class="px-3 py-1 bg-amber-200 hover:bg-amber-300 rounded-lg font-bold text-amber-900 transition cursor-pointer">
                     設定 Firebase API Key
                 </button>
             </div>
@@ -159,7 +159,7 @@
         </section>
 
         <section id="sec-admin" class="tab-content space-y-6 hidden">
-            <!-- Login Box if not authenticated -->
+            <!-- Login Box -->
             <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-cream-200 my-8">
                 <div class="text-center mb-6">
                     <div class="w-12 h-12 rounded-2xl bg-accent-olive/10 text-accent-olive flex items-center justify-center mx-auto mb-3">
@@ -183,7 +183,7 @@
                 </form>
             </div>
 
-            <!-- Admin Panel (Shown after login) -->
+            <!-- Admin Panel Dashboard -->
             <div id="adminPanel" class="space-y-6 hidden">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-3">
@@ -205,7 +205,6 @@
                     </div>
                 </div>
 
-                <!-- Admin Reservations List -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                         <h4 class="text-base font-bold text-cream-800">全院預約總覽表</h4>
@@ -246,7 +245,6 @@
                     </div>
                 </div>
 
-                <!-- Audit Log Section -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
                     <h4 class="text-base font-bold text-cream-800 mb-4 flex items-center">
                         <i class="fa-solid fa-list-check text-accent-olive mr-2"></i> 管理者稽核日誌 (Audit Log)
@@ -370,11 +368,11 @@
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-xl border border-cream-200 space-y-4">
             <div class="flex items-center justify-between border-b border-cream-100 pb-3">
                 <h3 class="text-base font-bold text-cream-800 flex items-center">
-                    <i class="fa-solid fa-key text-accent-olive mr-2"></i> Firebase 設定檔
+                    <i class="fa-solid fa-key text-accent-olive mr-2"></i> Firebase API Key 設定
                 </h3>
                 <button onclick="closeConfigModal()" class="text-cream-800/40 hover:text-cream-800 font-bold">✕</button>
             </div>
-            <p class="text-xs text-cream-800/70">若需使用 Firebase 雲端同步，請輸入您在 Firebase Console 取得的 API Key：</p>
+            <p class="text-xs text-cream-800/70">請輸入您在 Firebase Console 取得的 Web API Key：</p>
             <div>
                 <label class="block text-xs font-semibold text-cream-800 mb-1">Firebase API Key</label>
                 <input type="text" id="cfgApiKey" placeholder="AIzaSy..." class="w-full px-3.5 py-2 bg-cream-50 border border-cream-200 rounded-xl text-xs focus:ring-2 focus:ring-accent-olive focus:outline-none">
@@ -402,8 +400,15 @@
             getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged 
         } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        const customApiKey = localStorage.getItem('vghks_custom_api_key') || "";
-        const customProjectId = localStorage.getItem('vghks_custom_project_id') || "vhct-research-lab";
+        // -------------------------------------------------------------
+        // 💡 提示：請將您在 Firebase Console 取得的 API Key 貼在下方引號中！
+        // 貼上後，全院所有同仁開啟網頁都不需要再設定 Key，直接全自動連線！
+        // -------------------------------------------------------------
+        const DEFAULT_API_KEY = ""; // 例如: "AIzaSyDxxxxxxxxxxxxxxxxxxxx"
+        const DEFAULT_PROJECT_ID = "vhct-research-lab";
+
+        const customApiKey = DEFAULT_API_KEY || localStorage.getItem('vghks_custom_api_key') || "";
+        const customProjectId = localStorage.getItem('vghks_custom_project_id') || DEFAULT_PROJECT_ID;
 
         const firebaseConfig = {
             apiKey: customApiKey || "AIzaSyDummyKey_ReplaceIfRequired",
@@ -427,7 +432,6 @@
         let pendingCancelDocId = null;
         let pendingVerifyDocId = null;
         
-        // Retrieve session-based active Emp ID if available
         let activeEmpId = sessionStorage.getItem('vghks_active_emp_id') || ''; 
 
         const appId = "vhct-research-lab";
@@ -455,12 +459,17 @@
             const cfgProj = document.getElementById('cfgProjectId');
             if (cfgProj) cfgProj.value = customProjectId;
 
-            await initFirebaseOrFallback();
+            await initFirebase();
         };
 
-        async function initFirebaseOrFallback() {
+        async function initFirebase() {
+            updateSyncBadge(false, "連線中...");
+
             if (!customApiKey || customApiKey.includes("DummyKey")) {
-                enableFallbackMode("請設定有效 Firebase API Key（目前運行為展示備援模式）");
+                const banner = document.getElementById('demoModeBanner');
+                if (banner) banner.classList.remove('hidden');
+                updateSyncBadge(false, "未連線 (需設定 Key)");
+                showToast("尚未設定 Firebase API Key，請點擊右上角設定或在 index.html 填入金鑰！", "error");
                 return;
             }
 
@@ -476,45 +485,22 @@
                     }
                 });
 
-                try {
-                    const userCred = await signInAnonymously(auth);
-                    currentUser = userCred.user;
-                    isFirebaseActive = true;
-                    updateSyncBadge(true, "雲端連線中");
-                    subscribeToReservations();
-                    subscribeToAuditLogs();
-                } catch (authErr) {
-                    console.warn("Firebase Auth Error, falling back:", authErr);
-                    enableFallbackMode("Firebase 驗證失敗（已切換至展示備援模式）");
-                }
+                const userCred = await signInAnonymously(auth);
+                currentUser = userCred.user;
+                isFirebaseActive = true;
+                updateSyncBadge(true, "雲端同步中");
+                
+                const banner = document.getElementById('demoModeBanner');
+                if (banner) banner.classList.add('hidden');
+
+                subscribeToReservations();
+                subscribeToAuditLogs();
 
             } catch (err) {
-                console.warn("Firebase initialization error:", err);
-                enableFallbackMode("Firebase 連線失敗（已切換至展示備援模式）");
+                console.error("Firebase 連線失敗:", err);
+                updateSyncBadge(false, "連線失敗");
+                showToast("Firebase 雲端連線失敗，請檢查 API Key 與網路設定", "error");
             }
-        }
-
-        function enableFallbackMode(reason) {
-            isFirebaseActive = false;
-            updateSyncBadge(false, "展示備援模式");
-            const banner = document.getElementById('demoModeBanner');
-            if (banner) banner.classList.remove('hidden');
-
-            const storedRes = localStorage.getItem('vghks_local_reservations');
-            if (storedRes) {
-                try { reservations = JSON.parse(storedRes); } catch(e) { reservations = {}; }
-            } else {
-                reservations = {};
-            }
-
-            const storedLogs = localStorage.getItem('vghks_local_audit_logs');
-            if (storedLogs) {
-                try { auditLogs = JSON.parse(storedLogs); } catch(e) { auditLogs = []; }
-            }
-
-            renderSlotGrid();
-            renderMyBookings();
-            renderLocalAuditLogs();
         }
 
         function updateSyncBadge(isOnline, text) {
@@ -534,7 +520,7 @@
         }
 
         function subscribeToReservations() {
-            if (!isFirebaseActive || !db) return;
+            if (!db) return;
 
             try {
                 const resCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
@@ -551,11 +537,13 @@
                     renderMyBookings();
                     if (isAdmin) renderAdminTable();
                 }, (error) => {
-                    console.warn("Firestore sync error:", error);
-                    enableFallbackMode("資料庫讀取受限，切換至離線模式");
+                    console.error("Firestore 即時監聽錯誤:", error);
+                    updateSyncBadge(false, "權限不足 / 連線錯誤");
+                    showToast("讀取雲端預約資料失敗，請確認 Firestore 安全規則", "error");
                 });
             } catch (e) {
-                enableFallbackMode("Firestore 訂閱失敗");
+                console.error("Firestore 訂閱失敗:", e);
+                updateSyncBadge(false, "訂閱失敗");
             }
         }
 
@@ -639,7 +627,6 @@
                 const booking = reservations[docId];
                 const isBooked = !!booking;
                 
-                // Identify if slot belongs to active user session
                 const isMine = isBooked && (
                     (currentUser && booking.userId === currentUser.uid) ||
                     (activeEmpId && booking.employeeId && booking.employeeId.toUpperCase() === activeEmpId.toUpperCase())
@@ -816,7 +803,6 @@
             document.getElementById('modalDate').innerText = selectedDate;
             document.getElementById('modalSlot').innerText = slotLabel;
             
-            // Clean modal fields and set back to readonly to block browser auto-fill
             const fields = ['bookEmpId', 'bookEmpIdConfirm', 'bookContact'];
             fields.forEach(id => {
                 const el = document.getElementById(id);
@@ -918,16 +904,7 @@
                     renderMyBookings();
                 }
             } else {
-                if (reservations[docId] && reservations[docId].status === 'confirmed') {
-                    showToast("該時段已被預約！", "error");
-                } else {
-                    reservations[docId] = newBookingData;
-                    localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
-                    recordAuditLog('CREATE_RESERVATION', `[展示模式] 建立預約：${selectedDate} ${targetSlotToBook.label} (員編:${empId})`);
-                    showToast("預約成功！（寫入本機展示快取）", "success");
-                    renderSlotGrid();
-                    renderMyBookings();
-                }
+                showToast("尚未連線至 Firebase 雲端資料庫，請設定 API Key！", "error");
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認並送出預約</span>`;
                 closeBookingModal();
@@ -954,8 +931,6 @@
             if (isFirebaseActive && db) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
-                    
-                    // Attempt physical delete for clean release
                     await deleteDoc(docRef);
 
                     await recordAuditLog('CANCEL_RESERVATION', `取消預約：${docId}`);
@@ -977,26 +952,14 @@
                         showToast("已成功取消預約", "info");
                         delete reservations[docId];
                     } catch (upErr) {
-                        delete reservations[docId];
-                        localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
-                        showToast("已取消預約（同步本機狀態）", "info");
+                        showToast("取消預約失敗，請檢查權限設定", "error");
                     }
                     renderSlotGrid();
                     renderMyBookings();
                     if (isAdmin) renderAdminTable();
                 }
             } else {
-                if (reservations[docId]) {
-                    delete reservations[docId];
-                    localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
-                    recordAuditLog('CANCEL_RESERVATION', `[展示模式] 取消預約：${docId}`);
-                    showToast("已成功取消預約（本機模式）", "info");
-                    renderSlotGrid();
-                    renderMyBookings();
-                    if (isAdmin) renderAdminTable();
-                } else {
-                    showToast("查無該筆預約紀錄", "error");
-                }
+                showToast("未連線雲端資料庫", "error");
             }
         };
 
@@ -1047,9 +1010,7 @@
                     btn.innerText = "登入後台";
                 }
             } else {
-                isAdmin = true;
-                toggleAdminUI(true, email + " (展示後台)");
-                showToast("已登入展示管理員後台", "success");
+                showToast("未連線至 Firebase，無法進行管理員驗證", "error");
                 btn.disabled = false;
                 btn.innerText = "登入後台";
             }
@@ -1152,10 +1113,6 @@
                     const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'audit_logs');
                     await addDoc(logsRef, logEntry);
                 } catch (e) { console.error("Audit log error:", e); }
-            } else {
-                auditLogs.unshift(logEntry);
-                localStorage.setItem('vghks_local_audit_logs', JSON.stringify(auditLogs));
-                renderLocalAuditLogs();
             }
         }
 
