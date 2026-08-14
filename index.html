@@ -116,7 +116,7 @@
                                 <span class="text-xs font-medium tracking-wider text-warm-accent uppercase bg-warm-accent/10 px-2.5 py-0.5 rounded-full border border-warm-accent/20">臺北榮總新竹分院</span>
                                 <span id="syncStatusBadge" class="inline-flex items-center text-xs text-cream-600 font-medium bg-cream-200 px-2.5 py-0.5 rounded-full border border-cream-300/50">
                                     <span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5 animate-pulse"></span>
-                                    雲端連線中...
+                                    安全驗證中...
                                 </span>
                             </div>
                             <h1 class="text-xl sm:text-2xl font-bold text-warm-clay tracking-tight mt-0.5">共同研究室預約系統</h1>
@@ -131,12 +131,13 @@
                         </button>
                         <button onclick="window.switchTab('myBookings')" id="tabBtn-myBookings" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 text-cream-600 hover:text-warm-clay">
                             <i class="fa-solid fa-list-check"></i>
-                            <span>預約紀錄</span>
+                            <span>我的預約</span>
                             <span id="myCountBadge" class="hidden ml-1 px-1.5 py-0.2 text-xs bg-warm-accent text-white rounded-full">0</span>
                         </button>
                         <button onclick="window.switchTab('admin')" id="tabBtn-admin" class="nav-tab px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center space-x-2 text-cream-600 hover:text-warm-clay">
                             <i class="fa-solid fa-user-gear"></i>
                             <span>管理者專區</span>
+                            <span id="adminBadge" class="hidden ml-1 px-2 py-0.5 text-[10px] bg-warm-sage text-white rounded-full">已驗證</span>
                         </button>
                     </nav>
                 </div>
@@ -221,7 +222,7 @@
                         <div class="border-b border-cream-200 pb-4">
                             <span class="text-xs font-semibold text-warm-accent uppercase tracking-wider bg-warm-accent/10 px-2.5 py-1 rounded-full">填寫預約資料</span>
                             <h3 class="text-xl font-bold text-warm-clay mt-2">確認預約時段</h3>
-                            <p class="text-xs text-cream-600 mt-1">請填寫完整的預約者資訊，以利共同研究室審核與聯絡。</p>
+                            <p class="text-xs text-cream-600 mt-1">請填寫完整的預約者資訊，系統將安全儲存於雲端。</p>
                         </div>
 
                         <!-- Selected Slot Summary Box -->
@@ -275,10 +276,10 @@
                                 </label>
                                 <select id="inputPurpose" required class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
                                     <option value="">-- 請選擇使用目的 --</option>
-                                    <option value="研究室+桌機">研究室+桌機</option>
-                                    <option value="研究室+筆電(含統計軟體)">研究室+筆電(含統計軟體)</option>
-                                    <option value="耳機、麥克風">耳機、麥克風</option>
-                                    <option value="其他">其他</option>
+                                    <option value="研究室+桌機">1. 研究室+桌機</option>
+                                    <option value="研究室+筆電(含統計軟體)">2. 研究室+筆電(含統計軟體)</option>
+                                    <option value="耳機、麥克風">3. 耳機、麥克風</option>
+                                    <option value="其他">4. 其他</option>
                                 </select>
                             </div>
 
@@ -288,7 +289,7 @@
                                 </button>
                                 <button type="submit" id="submitBookingBtn" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-warm-accent text-white hover:bg-warm-accentHover shadow-sm transition flex items-center gap-2 ins-btn">
                                     <i class="fa-solid fa-paper-plane"></i>
-                                    <span>送出預約</span>
+                                    <span>確認並送出預約</span>
                                 </button>
                             </div>
                         </form>
@@ -301,13 +302,13 @@
                 <div class="ins-card rounded-3xl p-6 shadow-ins">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-cream-300/60 pb-4">
                         <div>
-                            <h2 class="text-lg font-bold text-warm-clay">預約紀錄與查詢</h2>
-                            <p class="text-xs text-cream-600 mt-0.5">即時檢視所有已登錄之研究室預約清單與進行狀態。</p>
+                            <h2 class="text-lg font-bold text-warm-clay">我的預約紀錄</h2>
+                            <p class="text-xs text-cream-600 mt-0.5">檢視與管理您於目前裝置/帳號登錄之預約紀錄。</p>
                         </div>
                         <div class="flex items-center space-x-2 w-full sm:w-auto">
                             <div class="relative flex-1 sm:w-64">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-cream-400 text-xs"></i>
-                                <input type="text" id="searchMyBookingInput" oninput="window.renderMyBookings()" placeholder="搜尋姓名、單位或日期..." class="w-full bg-cream-50 border border-cream-300 rounded-xl pl-9 pr-3 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
+                                <input type="text" id="searchMyBookingInput" oninput="window.renderMyBookings()" placeholder="搜尋日期或使用目的..." class="w-full bg-cream-50 border border-cream-300 rounded-xl pl-9 pr-3 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent/40">
                             </div>
                         </div>
                     </div>
@@ -321,19 +322,27 @@
 
             <!-- VIEW 3: ADMIN TAB -->
             <section id="view-admin" class="hidden space-y-6">
-                <!-- Admin Lock Screen -->
+                <!-- Admin Lock Screen (Firebase Auth Email/Password) -->
                 <div id="adminLockScreen" class="ins-card rounded-3xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6 shadow-ins">
                     <div class="w-16 h-16 bg-warm-accent/10 text-warm-accent rounded-2xl flex items-center justify-center mx-auto text-2xl border border-warm-accent/20">
-                        <i class="fa-solid fa-lock"></i>
+                        <i class="fa-solid fa-user-shield"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-warm-clay">管理者驗證</h2>
-                        <p class="text-xs text-cream-600 mt-1">請輸入管理員通行密碼以存取後台管理功能</p>
+                        <h2 class="text-xl font-bold text-warm-clay">管理者安全驗證</h2>
+                        <p class="text-xs text-cream-600 mt-1">請輸入管理員 Firebase Authentication 帳號密碼</p>
                     </div>
-                    <form onsubmit="window.handleAdminLogin(event)" class="space-y-4">
-                        <input type="password" id="adminPassInput" placeholder="預設密碼：1234" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-center text-sm tracking-widest text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
-                        <button type="submit" class="w-full bg-warm-accent hover:bg-warm-accentHover text-white py-2.5 rounded-xl text-xs font-semibold shadow-sm transition ins-btn">
-                            進入管理後台
+                    <form onsubmit="window.handleAdminAuthLogin(event)" class="space-y-4 text-left">
+                        <div>
+                            <label class="block text-xs font-semibold text-cream-700 mb-1">管理員 Email</label>
+                            <input type="email" id="adminEmailInput" required placeholder="admin@vhct.gov.tw" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-cream-700 mb-1">管理員密碼</label>
+                            <input type="password" id="adminPassInput" required placeholder="••••••••" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
+                        </div>
+                        <button type="submit" id="adminLoginBtn" class="w-full bg-warm-accent hover:bg-warm-accentHover text-white py-2.5 rounded-xl text-xs font-semibold shadow-sm transition ins-btn mt-2 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-key"></i>
+                            <span>驗證並存取後台</span>
                         </button>
                     </form>
                 </div>
@@ -347,19 +356,19 @@
                                 <i class="fa-solid fa-sliders"></i>
                             </div>
                             <div>
-                                <h2 class="text-base font-bold text-warm-clay">共同研究室管理後台</h2>
-                                <p class="text-xs text-cream-600">檢視全院預約狀況與進行系統管理</p>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-base font-bold text-warm-clay">共同研究室管理後台</h2>
+                                    <span class="text-[10px] bg-warm-sageLight text-warm-sage px-2 py-0.5 rounded-full font-semibold border border-warm-sage/30">Auth Guard Verified</span>
+                                </div>
+                                <p class="text-xs text-cream-600 mt-0.5" id="adminUserEmailText">管理員已連線</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 flex-wrap gap-y-2">
                             <button onclick="window.exportReservationsCSV()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-file-csv"></i> 匯出CSV
-                            </button>
-                            <button onclick="window.openChangePasswordModal()" class="px-3.5 py-2 text-xs font-semibold bg-cream-100 hover:bg-cream-200 text-warm-clay border border-cream-300 rounded-xl transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-key text-warm-accent"></i> 修改密碼
+                                <i class="fa-solid fa-file-csv"></i> 匯出完整紀錄 (CSV)
                             </button>
                             <button onclick="window.lockAdmin()" class="px-3.5 py-2 text-xs font-semibold bg-warm-roseLight text-warm-rose border border-warm-rose/30 rounded-xl transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-lock"></i> 鎖定後台
+                                <i class="fa-solid fa-right-from-bracket"></i> 登出管理員
                             </button>
                         </div>
                     </div>
@@ -367,7 +376,7 @@
                     <!-- Metrics Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
-                            <span class="text-xs text-cream-600 font-medium">總預約數</span>
+                            <span class="text-xs text-cream-600 font-medium">有效預約總數</span>
                             <div class="text-2xl font-bold text-warm-clay mt-1" id="statTotalCount">0</div>
                         </div>
                         <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
@@ -375,7 +384,7 @@
                             <div class="text-2xl font-bold text-warm-accent mt-1" id="statTodayCount">0</div>
                         </div>
                         <div class="ins-card rounded-2xl p-5 border border-cream-300/80 shadow-sm">
-                            <span class="text-xs text-cream-600 font-medium">預約最熱門單位</span>
+                            <span class="text-xs text-cream-600 font-medium">最熱門單位</span>
                             <div class="text-lg font-bold text-warm-sage truncate mt-1" id="statTopDept">--</div>
                         </div>
                     </div>
@@ -384,7 +393,7 @@
                     <div class="ins-card rounded-3xl p-6 shadow-ins space-y-4">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cream-300/60 pb-4">
                             <h3 class="font-bold text-warm-clay text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-list text-warm-accent"></i> 所有預約紀錄列表
+                                <i class="fa-solid fa-list text-warm-accent"></i> 全院完整預約清單 (含未遮蔽個資)
                             </h3>
                             <div class="flex flex-wrap items-center gap-3">
                                 <input type="date" id="adminFilterDate" onchange="window.renderAdminList()" class="bg-cream-50 border border-cream-300 rounded-xl px-3 py-1.5 text-xs text-warm-clay">
@@ -411,12 +420,12 @@
                                 <thead>
                                     <tr class="border-b border-cream-200 text-[11px] font-semibold text-cream-600 uppercase tracking-wider">
                                         <th class="py-3 px-3">日期 / 時間</th>
-                                        <th class="py-3 px-3">預約人</th>
+                                        <th class="py-3 px-3">預約人姓名</th>
                                         <th class="py-3 px-3">單位</th>
-                                        <th class="py-3 px-3">聯絡方式</th>
+                                        <th class="py-3 px-3">聯絡電話/分機</th>
                                         <th class="py-3 px-3">使用目的</th>
                                         <th class="py-3 px-3">狀態</th>
-                                        <th class="py-3 px-3 text-right">操作</th>
+                                        <th class="py-3 px-3 text-right">管理操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="adminTableBody" class="divide-y divide-cream-200/60 text-xs">
@@ -425,6 +434,32 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Audit Log Section -->
+                    <div class="ins-card rounded-3xl p-6 shadow-ins space-y-4">
+                        <div class="flex items-center justify-between border-b border-cream-300/60 pb-3">
+                            <h3 class="font-bold text-warm-clay text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-shield text-warm-accent"></i> 系統稽核日誌 (Audit Log)
+                            </h3>
+                            <span class="text-[11px] text-cream-600">自動記錄變更與取消行為</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-cream-200 text-[10px] font-semibold text-cream-600 uppercase">
+                                        <th class="py-2 px-3">時間</th>
+                                        <th class="py-2 px-3">操作類型</th>
+                                        <th class="py-2 px-3">執行者 (UID / Role)</th>
+                                        <th class="py-2 px-3">詳細描述</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTableBody" class="divide-y divide-cream-200/50 text-[11px]">
+                                    <!-- Dynamic Audit Logs -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -455,7 +490,7 @@
             </div>
             <div>
                 <h3 id="confirmTitle" class="font-bold text-warm-clay text-base">確認取消預約？</h3>
-                <p id="confirmDesc" class="text-xs text-cream-600 mt-1">取消後，該時段將重新釋出給其他人員預約。</p>
+                <p id="confirmDesc" class="text-xs text-cream-600 mt-1">取消後將保留歷史紀錄，該時段將重新釋出給其他人員預約。</p>
             </div>
             <div class="flex items-center justify-center space-x-3 pt-2">
                 <button onclick="window.closeConfirmModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-cream-200 text-cream-700 hover:bg-cream-300 transition">
@@ -468,44 +503,26 @@
         </div>
     </div>
 
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" class="fixed inset-0 bg-warm-clay/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="ins-card rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-cream-300 space-y-5 relative">
-            <button onclick="window.closeChangePasswordModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-cream-200 text-cream-600 hover:text-warm-clay flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="text-center space-y-1">
-                <div class="w-12 h-12 bg-warm-accent/10 text-warm-accent rounded-2xl flex items-center justify-center mx-auto text-xl border border-warm-accent/20">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <h3 class="font-bold text-warm-clay text-base pt-1">修改管理者密碼</h3>
-                <p class="text-xs text-cream-600">新密碼將即時儲存至雲端，跨裝置皆有效</p>
-            </div>
-            <form onsubmit="window.handleChangePassword(event)" class="space-y-3.5">
-                <div>
-                    <label class="block text-xs font-semibold text-cream-700 mb-1">目前管理者密碼</label>
-                    <input type="password" id="oldAdminPassInput" required placeholder="預設密碼：1234" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cream-700 mb-1">設定新密碼</label>
-                    <input type="password" id="newAdminPassInput" required placeholder="請輸入新密碼 (至少4字元)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cream-700 mb-1">確認新密碼</label>
-                    <input type="password" id="confirmAdminPassInput" required placeholder="再次輸入新密碼" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-3.5 py-2 text-xs text-warm-clay focus:outline-none focus:ring-2 focus:ring-warm-accent">
-                </div>
-                <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="window.closeChangePasswordModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-cream-600 hover:bg-cream-200 transition">取消</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-semibold bg-warm-accent text-white hover:bg-warm-accentHover transition ins-btn">儲存密碼</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            updateDoc, 
+            addDoc,
+            onSnapshot, 
+            runTransaction,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Constants
         const TIME_SLOTS = [
@@ -547,19 +564,24 @@
         const db = getFirestore(app);
 
         // State variables
+        let currentUser = null;
+        let isAdmin = false;
         let allReservations = []; 
-        let customAdminPassword = null;
+        let auditLogs = [];
         let selectedDate = getTodayString();
         let targetSlotToBook = null;
-        let isAdminLoggedIn = false;
 
-        // Firebase Path Helper
+        // Firebase Firestore Collection Paths (Strict Rule 1)
         function getReservationsCollectionRef() {
             return collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
         }
 
-        function getSettingsDocRef() {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminConfig');
+        function getAuditLogsCollectionRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'audit_logs');
+        }
+
+        function getAdminsCollectionRef() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'admins');
         }
 
         function getTodayString() {
@@ -586,8 +608,10 @@
             return day === 0 || day === 6;
         }
 
-        function getActiveAdminPassword() {
-            return customAdminPassword || localStorage.getItem('vghks_admin_password') || '1234';
+        function maskName(name) {
+            if (!name) return '已預約';
+            if (name.length <= 2) return name[0] + '○';
+            return name[0] + '○'.repeat(name.length - 2) + name[name.length - 1];
         }
 
         function updateSyncBadge(isOnline) {
@@ -595,56 +619,116 @@
             if (!badge) return;
             if (isOnline) {
                 badge.className = "inline-flex items-center text-xs text-warm-sage font-medium bg-warm-sageLight px-2.5 py-0.5 rounded-full border border-warm-sage/20";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>Firestore 雲端連線中`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-warm-sage animate-pulse mr-1.5"></span>Firestore 雲端連線 (${currentUser?.isAnonymous ? '一般使用者' : '管理員'})`;
             } else {
                 badge.className = "inline-flex items-center text-xs text-cream-600 font-medium bg-cream-200 px-2.5 py-0.5 rounded-full border border-cream-300/50";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>本機模式`;
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cream-400 mr-1.5"></span>安全連線中...`;
             }
         }
 
-        async function initAuthAndFirestore() {
-            // 確保先完成 Firebase 身份驗證，再建立雲端即時監聽 (Rule 3)
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Check if user is Admin via Custom Claims OR Firestore Admin Document
+                try {
+                    const tokenResult = await user.getIdTokenResult();
+                    const isCustomClaimAdmin = !!tokenResult.claims.admin;
+
+                    // Fallback check against /admins/{uid} doc
+                    const adminDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'admins', user.uid);
+                    const adminSnap = await getDoc(adminDocRef);
+                    const isAdminDoc = adminSnap.exists() && adminSnap.data().role === 'admin';
+
+                    isAdmin = isCustomClaimAdmin || isAdminDoc;
+                } catch(e) {
+                    isAdmin = false;
                 }
-            } catch (e) {
-                console.warn("Auth step warning:", e);
+
+                updateAdminUIState();
+                updateSyncBadge(true);
+                setupRealtimeListeners();
+            } else {
+                // Default fallback to Anonymous Login for General Users
+                try {
+                    await signInAnonymously(auth);
+                } catch(err) {
+                    console.error("Anonymous auth failed:", err);
+                }
             }
+        });
 
-            // Realtime Snapshot Listener: 預約紀錄即時全域同步
-            try {
-                const resColRef = getReservationsCollectionRef();
-                onSnapshot(resColRef, (snapshot) => {
-                    allReservations = [];
-                    snapshot.forEach(docSnap => {
-                        allReservations.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-                    
-                    updateSyncBadge(true); // 顯示連線成功
-                    renderSlotGrid();
-                    renderMyBookings();
-                    updateMyCountBadge();
-                    if (isAdminLoggedIn) renderAdminDashboard();
-                }, (err) => {
-                    console.warn("Firestore snapshot listener error:", err);
-                    updateSyncBadge(false);
+        function updateAdminUIState() {
+            const adminBadge = document.getElementById('adminBadge');
+            const adminLockScreen = document.getElementById('adminLockScreen');
+            const adminDashboard = document.getElementById('adminDashboard');
+            const adminEmailText = document.getElementById('adminUserEmailText');
+
+            if (isAdmin) {
+                if (adminBadge) adminBadge.classList.remove('hidden');
+                if (adminLockScreen) adminLockScreen.classList.add('hidden');
+                if (adminDashboard) adminDashboard.classList.remove('hidden');
+                if (adminEmailText) adminEmailText.innerText = `管理員：${currentUser.email || currentUser.uid}`;
+                renderAdminDashboard();
+            } else {
+                if (adminBadge) adminBadge.classList.add('hidden');
+                if (adminLockScreen) adminLockScreen.classList.remove('hidden');
+                if (adminDashboard) adminDashboard.classList.add('hidden');
+            }
+        }
+
+        let unsubscribeReservations = null;
+        let unsubscribeAuditLogs = null;
+
+        function setupRealtimeListeners() {
+            if (!currentUser) return;
+
+            // Unsubscribe existing
+            if (unsubscribeReservations) unsubscribeReservations();
+            if (unsubscribeAuditLogs) unsubscribeAuditLogs();
+
+            // Listen to Reservations
+            const resColRef = getReservationsCollectionRef();
+            unsubscribeReservations = onSnapshot(resColRef, (snapshot) => {
+                allReservations = [];
+                snapshot.forEach(docSnap => {
+                    allReservations.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                renderSlotGrid();
+                renderMyBookings();
+                updateMyCountBadge();
+                if (isAdmin) renderAdminDashboard();
+            }, (err) => {
+                console.warn("Reservations snapshot listener error:", err);
+            });
 
-                // Realtime Snapshot Listener: 管理者設定與密碼即時全域同步
-                const settingsRef = getSettingsDocRef();
-                onSnapshot(settingsRef, (docSnap) => {
-                    if (docSnap.exists() && docSnap.data().password) {
-                        customAdminPassword = docSnap.data().password;
-                        localStorage.setItem('vghks_admin_password', customAdminPassword);
-                    }
-                }, (err) => console.warn("Admin config listener err:", err));
+            // Listen to Audit Logs if Admin
+            const auditColRef = getAuditLogsCollectionRef();
+            unsubscribeAuditLogs = onSnapshot(auditColRef, (snapshot) => {
+                auditLogs = [];
+                snapshot.forEach(docSnap => {
+                    auditLogs.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                if (isAdmin) renderAuditLogs();
+            }, (err) => {
+                console.warn("Audit log listener error:", err);
+            });
+        }
 
-            } catch (err) {
-                console.warn("Firestore setup error:", err);
-                updateSyncBadge(false);
+        async function recordAuditLog(action, details, targetDocId = "") {
+            if (!currentUser) return;
+            try {
+                const auditColRef = getAuditLogsCollectionRef();
+                await addDoc(auditColRef, {
+                    action: action,
+                    performedBy: currentUser.uid,
+                    performedByEmail: currentUser.email || 'Anonymous',
+                    isAdminAction: isAdmin,
+                    targetReservationId: targetDocId,
+                    details: details,
+                    timestamp: new Date().toISOString()
+                });
+            } catch(e) {
+                console.warn("Could not record audit log:", e);
             }
         }
 
@@ -678,12 +762,6 @@
             renderSlotGrid();
         };
 
-        function maskName(name) {
-            if (!name) return '已預約';
-            if (name.length <= 2) return name[0] + '○';
-            return name[0] + '○'.repeat(name.length - 2) + name[name.length - 1];
-        }
-
         function renderSlotGrid() {
             const displayDate = document.getElementById('displaySelectedDateText');
             const displayStatus = document.getElementById('displaySlotAvailability');
@@ -703,7 +781,8 @@
                 if (weekendNotice) weekendNotice.classList.add('hidden');
             }
 
-            const activeBookingsOnDate = allReservations.filter(r => r.date === selectedDate && r.status !== 'cancelled');
+            // Filter active confirmed bookings on this date
+            const activeBookingsOnDate = allReservations.filter(r => r.date === selectedDate && r.status === 'confirmed');
             const bookedSlotIds = activeBookingsOnDate.map(r => r.slotId);
 
             const availableCount = TIME_SLOTS.length - bookedSlotIds.length;
@@ -726,6 +805,7 @@
                 }`;
 
                 if (isBooked) {
+                    // PII PROTECTION: Mask name and department for public slot grid. No raw phone displayed.
                     const maskedName = maskName(bookingInfo?.name || "已預約");
                     const dept = bookingInfo?.department || "院內人員";
 
@@ -744,7 +824,7 @@
                                 <span class="text-[11px] text-cream-600">${maskedName}</span>
                             </div>
                             <span class="text-xs text-cream-400 cursor-not-allowed px-3 py-1.5 bg-cream-200/50 rounded-xl">
-                                無法選擇
+                                時段已被排定
                             </span>
                         </div>
                     `;
@@ -786,55 +866,63 @@
         window.handleFormSubmit = async function(e) {
             e.preventDefault();
 
-            if (!targetSlotToBook) return;
+            if (!targetSlotToBook || !currentUser) return;
 
             const submitBtn = document.getElementById('submitBookingBtn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 同步中...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 寫入雲端防鎖中...`;
 
             const name = document.getElementById('inputName').value.trim();
             const department = document.getElementById('inputDept').value;
             const contact = document.getElementById('inputContact').value.trim();
             const purpose = document.getElementById('inputPurpose').value;
 
+            const docId = `${selectedDate}_${targetSlotToBook.id}`;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+
             try {
-                const docId = `${selectedDate}_${targetSlotToBook.id}`;
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+                // ATOMIC TRANSACTION: Guarantees double-booking prevention at database level
+                await runTransaction(db, async (transaction) => {
+                    const sfDoc = await transaction.get(docRef);
 
-                // Anti-Collision Atomic Check directly in Cloud
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists() && docSnap.data().status !== 'cancelled') {
-                    showToast("此時段剛剛已被其他使用者預約！", "error");
-                    window.closeBookingModal();
-                    renderSlotGrid();
-                    return;
-                }
+                    if (sfDoc.exists() && sfDoc.data().status === 'confirmed') {
+                        throw new Error("SLOT_ALREADY_BOOKED");
+                    }
 
-                const newBookingData = {
-                    date: selectedDate,
-                    slotId: targetSlotToBook.id,
-                    slotLabel: targetSlotToBook.label,
-                    name: name,
-                    department: department,
-                    contact: contact,
-                    purpose: purpose,
-                    status: "confirmed",
-                    createdAt: new Date().toISOString()
-                };
+                    const newBookingData = {
+                        date: selectedDate,
+                        slotId: targetSlotToBook.id,
+                        slotLabel: targetSlotToBook.label,
+                        name: name,
+                        department: department,
+                        contact: contact,
+                        purpose: purpose,
+                        status: "confirmed",
+                        userId: currentUser.uid,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
 
-                await setDoc(docRef, newBookingData);
+                    transaction.set(docRef, newBookingData);
+                });
 
-                showToast("預約成功！已即時同步至全院所有裝置。", "success");
+                await recordAuditLog('CREATE_RESERVATION', `建立預約：${selectedDate} ${targetSlotToBook.label} (${department} ${name})`, docId);
+
+                showToast("預約成功！已透過原子事務交易寫入雲端。", "success");
                 window.closeBookingModal();
                 renderSlotGrid();
                 updateMyCountBadge();
 
             } catch (err) {
-                console.error("Booking error:", err);
-                showToast("預約寫入失敗，請確認網路連線", "error");
+                console.error("Booking transaction error:", err);
+                if (err.message === "SLOT_ALREADY_BOOKED") {
+                    showToast("殘念！該時段剛剛已被其他人搶先預約了。", "error");
+                } else {
+                    showToast("預約寫入失敗，請確認網路連線與權限", "error");
+                }
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>送出預約</span>`;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認並送出預約</span>`;
             }
         };
 
@@ -856,15 +944,17 @@
 
             if (tab === 'myBookings') {
                 window.renderMyBookings();
-            } else if (tab === 'admin' && isAdminLoggedIn) {
-                renderAdminDashboard();
+            } else if (tab === 'admin') {
+                updateAdminUIState();
             }
         };
 
         function updateMyCountBadge() {
             const badge = document.getElementById('myCountBadge');
-            if (!badge) return;
-            const count = allReservations.filter(r => r.status !== 'cancelled').length;
+            if (!badge || !currentUser) return;
+
+            // General users see their own bookings
+            const count = allReservations.filter(r => r.status === 'confirmed' && (r.userId === currentUser.uid || isAdmin)).length;
             if (count > 0) {
                 badge.innerText = count;
                 badge.classList.remove('hidden');
@@ -875,17 +965,17 @@
 
         window.renderMyBookings = function() {
             const container = document.getElementById('myBookingsListContainer');
-            if (!container) return;
+            if (!container || !currentUser) return;
 
             const searchVal = document.getElementById('searchMyBookingInput')?.value.toLowerCase() || '';
 
-            let list = allReservations.filter(r => r.status !== 'cancelled');
+            // Filter user's own confirmed reservations (or all if admin)
+            let list = allReservations.filter(r => r.status === 'confirmed' && (r.userId === currentUser.uid || isAdmin));
 
             if (searchVal) {
                 list = list.filter(r => 
-                    r.name.toLowerCase().includes(searchVal) ||
-                    r.department.toLowerCase().includes(searchVal) ||
-                    r.date.includes(searchVal)
+                    r.date.includes(searchVal) ||
+                    r.purpose.toLowerCase().includes(searchVal)
                 );
             }
 
@@ -895,7 +985,7 @@
                 container.innerHTML = `
                     <div class="text-center py-12 text-cream-500 space-y-3">
                         <i class="fa-regular fa-folder-open text-3xl"></i>
-                        <p class="text-xs">尚無相關的預約紀錄</p>
+                        <p class="text-xs">目前沒有您的預約紀錄</p>
                     </div>
                 `;
                 return;
@@ -905,9 +995,6 @@
             list.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "ins-card rounded-2xl p-4 sm:p-5 border border-cream-300/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition hover:border-warm-accent/40";
-                
-                // 套用名字隱私保護遮罩
-                const maskedName = maskName(item.name);
 
                 card.innerHTML = `
                     <div class="space-y-1.5 flex-1">
@@ -919,11 +1006,11 @@
                                 ${item.slotLabel}
                             </span>
                             <span class="text-[11px] font-medium text-warm-sage bg-warm-sageLight px-2 py-0.5 rounded-full">
-                                已核準
+                                預約成立
                             </span>
                         </div>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-cream-700 pt-1">
-                            <span class="font-bold text-warm-clay"><i class="fa-solid fa-user text-cream-400 mr-1"></i>${maskedName} (${item.department})</span>
+                            <span class="font-bold text-warm-clay"><i class="fa-solid fa-user text-cream-400 mr-1"></i>${item.name} (${item.department})</span>
                             <span><i class="fa-solid fa-phone text-cream-400 mr-1"></i>${item.contact}</span>
                         </div>
                         <p class="text-xs text-cream-600 bg-cream-100/70 px-3 py-1.5 rounded-xl mt-1">
@@ -932,7 +1019,7 @@
                     </div>
                     <div class="self-end sm:self-center flex-shrink-0">
                         <button onclick="window.confirmCancelReservation('${item.id}', '${item.date}', '${item.slotLabel}')" class="px-3.5 py-1.5 text-xs font-semibold bg-warm-roseLight text-warm-rose hover:bg-warm-rose hover:text-white rounded-xl border border-warm-rose/30 transition ins-btn flex items-center gap-1">
-                            <i class="fa-solid fa-trash-can"></i> 取消預約
+                            <i class="fa-solid fa-ban"></i> 取消預約
                         </button>
                     </div>
                 `;
@@ -942,11 +1029,11 @@
 
         window.confirmCancelReservation = function(id, date, slotLabel) {
             document.getElementById('confirmTitle').innerText = "確認取消此預約？";
-            document.getElementById('confirmDesc').innerText = `時間：${date} ${slotLabel}。取消後時段將開放其他人預約。`;
+            document.getElementById('confirmDesc').innerText = `時間：${date} ${slotLabel}。取消後將保留歷史紀錄，時段將釋出。`;
             
             const execBtn = document.getElementById('confirmExecuteBtn');
             execBtn.onclick = async () => {
-                await executeCancel(id);
+                await executeSoftCancel(id);
                 window.closeConfirmModal();
             };
 
@@ -957,109 +1044,67 @@
             document.getElementById('confirmModal').classList.add('hidden');
         };
 
-        async function executeCancel(id) {
+        async function executeSoftCancel(id) {
+            if (!currentUser) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', id);
-                await deleteDoc(docRef);
+                
+                // SOFT CANCEL: Update status to 'cancelled' instead of deleteDoc()
+                await updateDoc(docRef, {
+                    status: "cancelled",
+                    cancelledBy: currentUser.uid,
+                    cancelledAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
 
-                showToast("預約已順利取消！", "info");
+                await recordAuditLog('CANCEL_RESERVATION', `取消預約：ID ${id}`, id);
+
+                showToast("預約已成功取消，資料狀態已更新為 cancelled。", "info");
                 renderSlotGrid();
                 window.renderMyBookings();
                 updateMyCountBadge();
-                if (isAdminLoggedIn) renderAdminDashboard();
+                if (isAdmin) renderAdminDashboard();
             } catch(e) {
                 console.error("Cancel error:", e);
-                showToast("取消預約失敗", "error");
+                showToast("取消預約失敗，無此權限或網路錯誤", "error");
             }
         }
 
-        window.handleAdminLogin = function(e) {
+        window.handleAdminAuthLogin = async function(e) {
             e.preventDefault();
-            const inputPass = document.getElementById('adminPassInput').value.trim();
-            const activePass = getActiveAdminPassword();
+            const email = document.getElementById('adminEmailInput').value.trim();
+            const password = document.getElementById('adminPassInput').value.trim();
+            const loginBtn = document.getElementById('adminLoginBtn');
 
-            if (inputPass === activePass) {
-                isAdminLoggedIn = true;
-                document.getElementById('adminLockScreen').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                renderAdminDashboard();
-                showToast("已成功登入管理者後台", "success");
-            } else {
-                showToast("通行密碼錯誤！", "error");
-            }
-        };
-
-        window.openChangePasswordModal = function() {
-            document.getElementById('oldAdminPassInput').value = '';
-            document.getElementById('newAdminPassInput').value = '';
-            document.getElementById('confirmAdminPassInput').value = '';
-            document.getElementById('changePasswordModal').classList.remove('hidden');
-        };
-
-        window.closeChangePasswordModal = function() {
-            document.getElementById('changePasswordModal').classList.add('hidden');
-        };
-
-        window.handleChangePassword = async function(e) {
-            e.preventDefault();
-            const oldPass = document.getElementById('oldAdminPassInput').value.trim();
-            const newPass = document.getElementById('newAdminPassInput').value.trim();
-            const confirmPass = document.getElementById('confirmAdminPassInput').value.trim();
-
-            const currentPass = getActiveAdminPassword();
-
-            if (oldPass !== currentPass) {
-                showToast("原密碼不正確！請重新輸入", "error");
-                return;
-            }
-
-            if (newPass.length < 4) {
-                showToast("新密碼長度至少需 4 個字元", "error");
-                return;
-            }
-
-            if (newPass !== confirmPass) {
-                showToast("新密碼與確認密碼不一致", "error");
-                return;
-            }
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "儲存中...";
-            }
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Firebase Auth 驗證中...`;
 
             try {
-                const settingsRef = getSettingsDocRef();
-                // 寫入 Google Firebase 雲端資料庫，實現跨電腦/裝置全域同步
-                await setDoc(settingsRef, { password: newPass, updatedAt: new Date().toISOString() });
-
-                customAdminPassword = newPass;
-                localStorage.setItem('vghks_admin_password', newPass);
-
-                showToast("管理者密碼已成功變更並同步至全院所有裝置！", "success");
-                window.closeChangePasswordModal();
-            } catch(err) {
-                console.error("Cloud pass update error:", err);
-                showToast("雲端同步失敗，請檢查網路連線", "error");
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("管理員身份驗證成功！", "success");
+                await recordAuditLog('ADMIN_LOGIN', `管理員登入成功：${email}`);
+            } catch (err) {
+                console.error("Admin Login Error:", err);
+                showToast("驗證失敗！帳號或密碼錯誤", "error");
             } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "儲存密碼";
-                }
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = `<i class="fa-solid fa-key"></i> <span>驗證並存取後台</span>`;
             }
         };
 
-        window.lockAdmin = function() {
-            isAdminLoggedIn = false;
-            document.getElementById('adminPassInput').value = '';
-            document.getElementById('adminLockScreen').classList.remove('hidden');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            showToast("已鎖定管理者後台", "info");
+        window.lockAdmin = async function() {
+            try {
+                await recordAuditLog('ADMIN_LOGOUT', `管理員登出`);
+                await signOut(auth);
+                isAdmin = false;
+                showToast("已安全性登出管理員身分", "info");
+            } catch(e) {
+                console.error("Logout error:", e);
+            }
         };
 
         function renderAdminDashboard() {
-            const activeList = allReservations.filter(r => r.status !== 'cancelled');
+            const activeList = allReservations.filter(r => r.status === 'confirmed');
             
             document.getElementById('statTotalCount').innerText = activeList.length;
 
@@ -1082,6 +1127,7 @@
             document.getElementById('statTopDept').innerText = topDept !== '--' ? `${topDept} (${maxC}次)` : '--';
 
             window.renderAdminList();
+            renderAuditLogs();
         }
 
         window.renderAdminList = function() {
@@ -1091,7 +1137,7 @@
             const dateFilter = document.getElementById('adminFilterDate').value;
             const deptFilter = document.getElementById('adminFilterDept').value;
 
-            let list = allReservations.filter(r => r.status !== 'cancelled');
+            let list = allReservations.filter(r => r.status === 'confirmed');
 
             if (dateFilter) list = list.filter(r => r.date === dateFilter);
             if (deptFilter) list = list.filter(r => r.department === deptFilter);
@@ -1119,20 +1165,46 @@
                     </td>
                     <td class="py-3 px-3 font-medium text-warm-clay">${item.name}</td>
                     <td class="py-3 px-3 text-cream-700">${item.department}</td>
-                    <td class="py-3 px-3 text-cream-600">${item.contact}</td>
+                    <td class="py-3 px-3 text-cream-600 font-mono">${item.contact}</td>
                     <td class="py-3 px-3 text-cream-600 max-w-xs truncate" title="${item.purpose}">${item.purpose}</td>
                     <td class="py-3 px-3">
-                        <span class="text-[10px] bg-warm-sageLight text-warm-sage px-2 py-0.5 rounded-full font-semibold">正常預約</span>
+                        <span class="text-[10px] bg-warm-sageLight text-warm-sage px-2 py-0.5 rounded-full font-semibold">confirmed</span>
                     </td>
                     <td class="py-3 px-3 text-right">
                         <button onclick="window.confirmCancelReservation('${item.id}', '${item.date}', '${item.slotLabel}')" class="text-warm-rose hover:text-red-700 font-semibold text-xs px-2 py-1 rounded bg-warm-roseLight">
-                            刪除
+                            管理取消
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         };
+
+        function renderAuditLogs() {
+            const tbody = document.getElementById('auditTableBody');
+            if (!tbody) return;
+
+            const list = [...auditLogs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-cream-500">尚無稽核紀錄</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            list.slice(0, 30).forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-cream-100/40";
+                const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleString('zh-TW') : '--';
+                tr.innerHTML = `
+                    <td class="py-2 px-3 text-cream-600 font-mono text-[10px]">${dateStr}</td>
+                    <td class="py-2 px-3 font-bold text-warm-clay">${log.action}</td>
+                    <td class="py-2 px-3 text-cream-700 font-mono text-[10px]">${log.performedByEmail || log.performedBy}</td>
+                    <td class="py-2 px-3 text-cream-600">${log.details || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         window.resetAdminFilters = function() {
             document.getElementById('adminFilterDate').value = '';
@@ -1141,26 +1213,33 @@
         };
 
         window.exportReservationsCSV = function() {
-            const list = allReservations.filter(r => r.status !== 'cancelled');
+            if (!isAdmin) {
+                showToast("無管理員權限無法匯出清單", "error");
+                return;
+            }
+
+            const list = allReservations.filter(r => r.status === 'confirmed');
             if (list.length === 0) {
                 showToast("無資料可供匯出", "info");
                 return;
             }
 
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-            csvContent += "預約日期,預約時段,預約姓名,單位科別,聯絡方式,使用目的,建立時間\n";
+            csvContent += "預約ID,預約日期,預約時段,預約人姓名,單位科別,聯絡電話/分機,使用目的,使用者UID,狀態,建立時間\n";
 
             list.forEach(r => {
-                csvContent += `"${r.date}","${r.slotLabel}","${r.name}","${r.department}","${r.contact}","${r.purpose.replace(/"/g, '""')}","${r.createdAt || ''}"\n`;
+                csvContent += `"${r.id}","${r.date}","${r.slotLabel}","${r.name}","${r.department}","${r.contact}","${r.purpose.replace(/"/g, '""')}","${r.userId || ''}","${r.status}","${r.createdAt || ''}"\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `共同研究室預約紀錄_${getTodayString()}.csv`);
+            link.setAttribute("download", `共同研究室完整預約紀錄_${getTodayString()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+            recordAuditLog('EXPORT_CSV', `匯出 CSV 清單 (${list.length} 筆)`);
         };
 
         function showToast(msg, type = "info") {
@@ -1192,7 +1271,7 @@
             }, 3200);
         }
 
-        // Initialize App
+        // Init App
         function initApp() {
             const todayEl = document.getElementById('currentTodayText');
             if (todayEl) todayEl.innerText = formatDateWithWeekday(getTodayString());
@@ -1204,10 +1283,6 @@
             }
 
             renderSlotGrid();
-            updateMyCountBadge();
-            
-            // Connect to Cloud Database
-            initAuthAndFirestore();
         }
 
         initApp();
