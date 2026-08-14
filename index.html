@@ -762,8 +762,9 @@
             listEl.innerHTML = '';
 
             const searchInput = document.getElementById('myEmpSearchInput');
-            const empSearch = searchInput ? searchInput.value.trim().toUpperCase() : (activeEmpId || '');
-            
+            const searchVal = searchInput ? searchInput.value.trim().toUpperCase() : '';
+            const empSearch = searchVal || (activeEmpId ? activeEmpId.toUpperCase() : '');
+
             const myBookings = Object.entries(reservations)
                 .map(([id, data]) => ({ id, ...data }))
                 .filter(item => {
@@ -865,6 +866,11 @@
 
             activeEmpId = empId;
             sessionStorage.setItem('vghks_active_emp_id', activeEmpId);
+
+            const searchInputEl = document.getElementById('myEmpSearchInput');
+            if (searchInputEl && !searchInputEl.value.trim()) {
+                searchInputEl.value = empId;
+            }
 
             const submitBtn = document.getElementById('submitBookingBtn');
             submitBtn.disabled = true;
