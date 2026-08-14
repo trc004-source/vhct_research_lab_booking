@@ -14,7 +14,1234 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-[#FAF8F5]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺北榮總新竹分院 - 共同研究室預約系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
                     colors: {
+                        cream: {
+                            50: '#FAF8F5',
+                            100: '#F4EFEA',
+                            200: '#E8DFD5',
+                            300: '#D6C7B7',
+                            800: '#5C4A3E',
+                            900: '#3D3027'
+                        },
+                        accent: {
+                            olive: '#6B705C',
+                            terracotta: '#CB997E'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #FAF8F5;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D6C7B7;
+            border-radius: 8px;
+        }
+        .tab-active {
+            border-bottom: 2px solid #6B705C;
+            color: #6B705C !important;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-cream-900 bg-[#FAF8F5]">
+
+    <header class="bg-white border-b border-cream-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-accent-olive/10 text-accent-olive flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-cream-800 leading-tight">臺北榮總新竹分院</h1>
+                    <p class="text-xs text-cream-900/60 font-medium">共同研究室即時預約系統</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <span id="syncStatus" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer" onclick="openConfigModal()">
+                    <span class="w-2 h-2 mr-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="syncStatusText">初始化連線...</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-white border-b border-cream-200 sticky top-16 z-20 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-8 text-sm" aria-label="Tabs">
+                <button onclick="switchTab('booking')" id="tab-booking" class="tab-btn py-4 px-1 inline-flex items-center space-x-2 tab-active text-cream-800">
+                    <i class="fa-solid fa-calendar-days text-base"></i>
+                    <span>預約時段</span>
+                </button>
+                <button onclick="switchTab('my-bookings')" id="tab-my-bookings" class="tab-btn py-4 px-1 inline-flex items-center space-x-2 text-cream-800/60 hover:text-cream-800">
+                    <i class="fa-solid fa-bookmark text-base"></i>
+                    <span>我的預約</span>
+                    <span id="myCountBadge" class="ml-1 px-2 py-0.5 text-xs bg-cream-100 text-cream-800 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn py-4 px-1 inline-flex items-center space-x-2 text-cream-800/60 hover:text-cream-800">
+                    <i class="fa-solid fa-user-shield text-base"></i>
+                    <span>管理者專區</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <section id="sec-booking" class="tab-content space-y-6">
+            <div id="demoModeBanner" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 flex items-center justify-between hidden">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
+                    <span>目前運行於<strong>【展示備援模式】</strong>（未連結有效 Firebase API Key）。預約操作將寫入瀏覽器快取。</span>
+                </div>
+                <button onclick="openConfigModal()" class="px-3 py-1 bg-amber-200 hover:bg-amber-300 rounded-lg font-bold text-amber-900 transition">
+                    設定 Firebase API Key
+                </button>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-cream-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <label for="dateSelect" class="text-sm font-semibold text-cream-800 whitespace-nowrap">
+                        <i class="fa-regular fa-calendar text-accent-olive mr-1"></i> 選擇預約日期：
+                    </label>
+                    <input type="date" id="dateSelect" onchange="onDateChange()" class="px-3 py-2 bg-cream-50 border border-cream-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                </div>
+                
+                <div class="flex items-center space-x-4 text-xs font-medium text-cream-800/70">
+                    <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-emerald-100 border border-emerald-300 mr-1.5"></span> 可預約</span>
+                    <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-cream-200 border border-cream-300 mr-1.5"></span> 已額滿 (可點擊輸入員編取消)</span>
+                    <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-accent-terracotta/20 border border-accent-terracotta mr-1.5"></span> 我的預約</span>
+                </div>
+            </div>
+
+            <!-- Slots Grid -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
+                <h3 class="text-base font-bold text-cream-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-clock text-accent-olive mr-2"></i>
+                    <span id="currentDateDisplay">----年--月--日</span> 時段預約狀態
+                </h3>
+                <div id="slotGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Dynamic slot grid rendering -->
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-my-bookings" class="tab-content space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-cream-800">我的預約紀錄與查詢</h3>
+                        <p class="text-xs text-cream-800/60 mt-0.5">請輸入員工編號查詢與管理個人的預約紀錄</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="myEmpSearchInput" name="no_autofill_search_emp" placeholder="請輸入員工編號..." autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly')" oninput="this.value = this.value.toUpperCase()" class="px-4 py-2 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <button onclick="searchMyBookingsByEmp()" class="px-4 py-2 bg-accent-olive text-white rounded-xl text-sm font-medium hover:bg-accent-olive/90 transition">
+                            <i class="fa-solid fa-magnifying-glass mr-1"></i> 查詢紀錄
+                        </button>
+                    </div>
+                </div>
+
+                <div id="myBookingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamic list rendering -->
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-admin" class="tab-content space-y-6 hidden">
+            <!-- Login Box if not authenticated -->
+            <div id="adminLoginForm" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-cream-200 my-8">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-accent-olive/10 text-accent-olive flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-lock text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-cream-800">管理員登入</h3>
+                    <p class="text-xs text-cream-800/60 mt-1">請使用 Firebase 管理員帳號登入</p>
+                </div>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4" autocomplete="off">
+                    <div>
+                        <label class="block text-xs font-semibold text-cream-800 mb-1">管理員信箱</label>
+                        <input type="email" id="adminEmail" required placeholder="admin@vhct.gov.tw" autocomplete="off" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-cream-800 mb-1">密碼</label>
+                        <input type="password" id="adminPassword" required placeholder="••••••••" autocomplete="off" class="w-full px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                    </div>
+                    <button type="submit" id="adminLoginBtn" class="w-full py-3 bg-accent-olive text-white font-semibold rounded-xl text-sm shadow-md hover:bg-accent-olive/90 transition">
+                        登入後台
+                    </button>
+                </form>
+            </div>
+
+            <!-- Admin Panel (Shown after login) -->
+            <div id="adminPanel" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-accent-olive text-white flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-cream-800">管理員控制台</h3>
+                            <p id="adminUserDisplay" class="text-xs text-cream-800/60">已登入：--</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="exportToCSV()" class="px-4 py-2 bg-cream-100 text-cream-800 font-medium rounded-xl text-xs hover:bg-cream-200 transition">
+                            <i class="fa-solid fa-file-csv mr-1"></i> 匯出 CSV 預約紀錄
+                        </button>
+                        <button onclick="handleAdminLogout()" class="px-4 py-2 bg-rose-50 text-rose-600 font-medium rounded-xl text-xs hover:bg-rose-100 transition">
+                            登出管理員
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Reservations List -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                        <h4 class="text-base font-bold text-cream-800">全院預約總覽表</h4>
+                        <div class="flex items-center space-x-2">
+                            <select id="adminDeptFilter" onchange="renderAdminTable()" class="px-3 py-1.5 border border-cream-200 rounded-xl text-xs focus:outline-none">
+                                <option value="ALL">全部科別</option>
+                                <option value="藥劑科">藥劑科</option>
+                                <option value="放射科">放射科</option>
+                                <option value="檢驗科">檢驗科</option>
+                                <option value="護理部">護理部</option>
+                                <option value="營養科">營養科</option>
+                                <option value="物理治療">物理治療</option>
+                                <option value="職能治療">職能治療</option>
+                                <option value="臨床心理">臨床心理</option>
+                                <option value="教研中心">教研中心</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-cream-900 border-collapse">
+                            <thead>
+                                <tr class="bg-cream-50 border-b border-cream-200 text-cream-800 font-semibold">
+                                    <th class="p-3">日期</th>
+                                    <th class="p-3">時段</th>
+                                    <th class="p-3">員工編號</th>
+                                    <th class="p-3">科別</th>
+                                    <th class="p-3">聯絡電話</th>
+                                    <th class="p-3">研究用途</th>
+                                    <th class="p-3">狀態</th>
+                                    <th class="p-3 text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody" class="divide-y divide-cream-100">
+                                <!-- Dynamic admin table rendering -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Audit Log Section -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
+                    <h4 class="text-base font-bold text-cream-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-list-check text-accent-olive mr-2"></i> 管理者稽核日誌 (Audit Log)
+                    </h4>
+                    <div class="max-h-60 overflow-y-auto custom-scrollbar border border-cream-100 rounded-xl p-3 bg-cream-50/50 space-y-2 text-xs" id="auditLogList">
+                        <!-- Logs rendering -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-xl border border-cream-200 space-y-5 animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center justify-between border-b border-cream-100 pb-3">
+                <h3 class="text-lg font-bold text-cream-800 flex items-center">
+                    <i class="fa-solid fa-pen-to-square text-accent-olive mr-2"></i> 建立預約
+                </h3>
+                <button onclick="closeBookingModal()" class="text-cream-800/40 hover:text-cream-800 text-xl font-bold p-1">✕</button>
+            </div>
+
+            <div class="bg-cream-50 p-3 rounded-xl border border-cream-100 text-xs text-cream-800 space-y-1">
+                <p><strong>預約日期：</strong> <span id="modalDate" class="text-accent-olive font-bold"></span></p>
+                <p><strong>預約時段：</strong> <span id="modalSlot" class="text-accent-olive font-bold"></span></p>
+            </div>
+
+            <form onsubmit="handleBookingSubmit(event)" class="space-y-4" autocomplete="off">
+                <div>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填，1位大寫英文+4位數字)</label>
+                    <input type="text" id="bookEmpId" name="no_autofill_emp_id" required placeholder="請輸入員工編號" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly')" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">再次確認員工編號 (防呆核對)</label>
+                    <input type="text" id="bookEmpIdConfirm" name="no_autofill_emp_id_confirm" required placeholder="請再次輸入員工編號" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly')" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">單位 / 科別 (必填)</label>
+                    <select id="bookDepartment" required class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <option value="" disabled selected>請選擇科別</option>
+                        <option value="藥劑科">藥劑科</option>
+                        <option value="放射科">放射科</option>
+                        <option value="檢驗科">檢驗科</option>
+                        <option value="護理部">護理部</option>
+                        <option value="營養科">營養科</option>
+                        <option value="物理治療">物理治療</option>
+                        <option value="職能治療">職能治療</option>
+                        <option value="臨床心理">臨床心理</option>
+                        <option value="教研中心">教研中心</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">聯絡電話 / 分機 (必填)</label>
+                    <input type="text" id="bookContact" name="no_autofill_contact_num" required placeholder="例如：分機 1234 或 0912-345678" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly')" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">研究用途 (必填)</label>
+                    <select id="bookPurpose" required class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <option value="" disabled selected>請選擇研究用途</option>
+                        <option value="研究室+桌機">研究室+桌機</option>
+                        <option value="研究室+筆電(含統計軟體)">研究室+筆電(含統計軟體)</option>
+                        <option value="耳機、麥克風">耳機、麥克風</option>
+                    </select>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeBookingModal()" class="px-4 py-2.5 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">取消</button>
+                    <button type="submit" id="submitBookingBtn" class="px-5 py-2.5 bg-accent-olive text-white rounded-xl text-xs font-semibold shadow-md hover:bg-accent-olive/90 transition flex items-center space-x-1">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>確認並送出預約</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Verify Emp ID to Cancel Modal -->
+    <div id="verifyCancelModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-xl border border-cream-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-cream-100 pb-3">
+                <h3 class="text-base font-bold text-cream-800 flex items-center">
+                    <i class="fa-solid fa-user-check text-accent-olive mr-2"></i> 核對員工編號取消
+                </h3>
+                <button onclick="closeVerifyCancelModal()" class="text-cream-800/40 hover:text-cream-800 font-bold">✕</button>
+            </div>
+            <p class="text-xs text-cream-800/70">此時段已被預約。如需取消，請輸入預約時填寫的<strong>員工編號</strong>進行身分核對：</p>
+            <div>
+                <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號</label>
+                <input type="text" id="verifyEmpIdInput" name="no_autofill_verify_emp" placeholder="請輸入員工編號" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly')" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+            </div>
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeVerifyCancelModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">取消</button>
+                <button type="button" onclick="submitVerifyAndCancel()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md hover:bg-rose-700 transition">核對並取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelConfirmModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-xl border border-cream-200 space-y-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-cream-800">確認取消預約？</h3>
+                <p class="text-xs text-cream-800/70 mt-1">取消後此時段將重新開放給全院同仁預約。</p>
+            </div>
+            <div class="flex items-center justify-center space-x-3 pt-2">
+                <button type="button" onclick="closeCancelModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">再想想</button>
+                <button type="button" onclick="executeCancelBooking()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md hover:bg-rose-700 transition">確認取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Config Modal -->
+    <div id="configModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-xl border border-cream-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-cream-100 pb-3">
+                <h3 class="text-base font-bold text-cream-800 flex items-center">
+                    <i class="fa-solid fa-key text-accent-olive mr-2"></i> Firebase 設定檔
+                </h3>
+                <button onclick="closeConfigModal()" class="text-cream-800/40 hover:text-cream-800 font-bold">✕</button>
+            </div>
+            <p class="text-xs text-cream-800/70">若需使用 Firebase 雲端同步，請輸入您在 Firebase Console 取得的 API Key：</p>
+            <div>
+                <label class="block text-xs font-semibold text-cream-800 mb-1">Firebase API Key</label>
+                <input type="text" id="cfgApiKey" placeholder="AIzaSy..." class="w-full px-3.5 py-2 bg-cream-50 border border-cream-200 rounded-xl text-xs focus:ring-2 focus:ring-accent-olive focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-cream-800 mb-1">Firebase Project ID</label>
+                <input type="text" id="cfgProjectId" value="vhct-research-lab" class="w-full px-3.5 py-2 bg-cream-50 border border-cream-200 rounded-xl text-xs focus:ring-2 focus:ring-accent-olive focus:outline-none">
+            </div>
+            <div class="pt-2 flex justify-end space-x-2">
+                <button onclick="closeConfigModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold">關閉</button>
+                <button onclick="saveFirebaseConfig()" class="px-4 py-2 bg-accent-olive text-white rounded-xl text-xs font-semibold shadow-md">儲存並重新連線</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { 
+            getFirestore, collection, doc, onSnapshot, runTransaction, updateDoc, deleteDoc, addDoc, getDoc, query, orderBy, limit 
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { 
+            getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        const customApiKey = localStorage.getItem('vghks_custom_api_key') || "";
+        const customProjectId = localStorage.getItem('vghks_custom_project_id') || "vhct-research-lab";
+
+        const firebaseConfig = {
+            apiKey: customApiKey || "AIzaSyDummyKey_ReplaceIfRequired",
+            authDomain: `${customProjectId}.firebaseapp.com`,
+            projectId: customProjectId,
+            storageBucket: `${customProjectId}.appspot.com`,
+            messagingSenderId: "100000000000",
+            appId: "1:100000000000:web:abcdef123456"
+        };
+
+        let app = null;
+        let db = null;
+        let auth = null;
+        let isFirebaseActive = false;
+        let currentUser = null;
+        let isAdmin = false;
+        let reservations = {};
+        let auditLogs = [];
+        let selectedDate = new Date().toISOString().split('T')[0];
+        let targetSlotToBook = null;
+        let pendingCancelDocId = null;
+        let pendingVerifyDocId = null;
+        
+        // Retrieve session-based active Emp ID if available
+        let activeEmpId = sessionStorage.getItem('vghks_active_emp_id') || ''; 
+
+        const appId = "vhct-research-lab";
+
+        const SLOTS = [
+            { id: "08-09", label: "08:00 - 09:00" },
+            { id: "09-10", label: "09:00 - 10:00" },
+            { id: "10-11", label: "10:00 - 11:00" },
+            { id: "11-12", label: "11:00 - 12:00" },
+            { id: "13-14", label: "13:00 - 14:00" },
+            { id: "14-15", label: "14:00 - 15:00" },
+            { id: "15-16", label: "15:00 - 16:00" },
+            { id: "16-17", label: "16:00 - 17:00" }
+        ];
+
+        window.onload = async () => {
+            const dateInput = document.getElementById('dateSelect');
+            if (dateInput) {
+                dateInput.value = selectedDate;
+                dateInput.min = selectedDate;
+            }
+
+            const cfgKey = document.getElementById('cfgApiKey');
+            if (cfgKey) cfgKey.value = customApiKey;
+            const cfgProj = document.getElementById('cfgProjectId');
+            if (cfgProj) cfgProj.value = customProjectId;
+
+            await initFirebaseOrFallback();
+        };
+
+        async function initFirebaseOrFallback() {
+            if (!customApiKey || customApiKey.includes("DummyKey")) {
+                enableFallbackMode("請設定有效 Firebase API Key（目前運行為展示備援模式）");
+                return;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    currentUser = user;
+                    if (user) {
+                        checkAdminStatus(user);
+                    }
+                });
+
+                try {
+                    const userCred = await signInAnonymously(auth);
+                    currentUser = userCred.user;
+                    isFirebaseActive = true;
+                    updateSyncBadge(true, "雲端連線中");
+                    subscribeToReservations();
+                    subscribeToAuditLogs();
+                } catch (authErr) {
+                    console.warn("Firebase Auth Error, falling back:", authErr);
+                    enableFallbackMode("Firebase 驗證失敗（已切換至展示備援模式）");
+                }
+
+            } catch (err) {
+                console.warn("Firebase initialization error:", err);
+                enableFallbackMode("Firebase 連線失敗（已切換至展示備援模式）");
+            }
+        }
+
+        function enableFallbackMode(reason) {
+            isFirebaseActive = false;
+            updateSyncBadge(false, "展示備援模式");
+            const banner = document.getElementById('demoModeBanner');
+            if (banner) banner.classList.remove('hidden');
+
+            const storedRes = localStorage.getItem('vghks_local_reservations');
+            if (storedRes) {
+                try { reservations = JSON.parse(storedRes); } catch(e) { reservations = {}; }
+            } else {
+                reservations = {};
+            }
+
+            const storedLogs = localStorage.getItem('vghks_local_audit_logs');
+            if (storedLogs) {
+                try { auditLogs = JSON.parse(storedLogs); } catch(e) { auditLogs = []; }
+            }
+
+            renderSlotGrid();
+            renderMyBookings();
+            renderLocalAuditLogs();
+        }
+
+        function updateSyncBadge(isOnline, text) {
+            const badge = document.getElementById('syncStatus');
+            const textEl = document.getElementById('syncStatusText');
+            if (textEl) textEl.innerText = text;
+
+            if (badge) {
+                if (isOnline) {
+                    badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer";
+                    badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-emerald-500"></span> <span>${text}</span>`;
+                } else {
+                    badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer";
+                    badge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-amber-400 animate-pulse"></span> <span>${text}</span>`;
+                }
+            }
+        }
+
+        function subscribeToReservations() {
+            if (!isFirebaseActive || !db) return;
+
+            try {
+                const resCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'reservations');
+                onSnapshot(resCollectionRef, (snapshot) => {
+                    reservations = {};
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        if (data.status === 'confirmed') {
+                            reservations[docSnap.id] = data;
+                        }
+                    });
+
+                    renderSlotGrid();
+                    renderMyBookings();
+                    if (isAdmin) renderAdminTable();
+                }, (error) => {
+                    console.warn("Firestore sync error:", error);
+                    enableFallbackMode("資料庫讀取受限，切換至離線模式");
+                });
+            } catch (e) {
+                enableFallbackMode("Firestore 訂閱失敗");
+            }
+        }
+
+        function subscribeToAuditLogs() {
+            if (!isFirebaseActive || !db) return;
+
+            try {
+                const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'audit_logs');
+                const q = query(logsRef, orderBy('timestamp', 'desc'), limit(20));
+
+                onSnapshot(q, (snapshot) => {
+                    const listEl = document.getElementById('auditLogList');
+                    if (!listEl) return;
+                    listEl.innerHTML = '';
+
+                    if (snapshot.empty) {
+                        listEl.innerHTML = `<p class="text-cream-800/50 text-center py-2">尚無稽核紀錄</p>`;
+                        return;
+                    }
+
+                    snapshot.forEach(docSnap => {
+                        const log = docSnap.data();
+                        const item = document.createElement('div');
+                        item.className = "flex items-start justify-between border-b border-cream-100 pb-1.5";
+                        item.innerHTML = `
+                            <div>
+                                <span class="font-bold text-cream-800">${log.action}</span>
+                                <p class="text-cream-800/70">${log.details}</p>
+                            </div>
+                            <span class="text-[10px] text-cream-800/40 whitespace-nowrap ml-2">${new Date(log.timestamp).toLocaleString('zh-TW')}</span>
+                        `;
+                        listEl.appendChild(item);
+                    });
+                }, () => {
+                    renderLocalAuditLogs();
+                });
+            } catch(e) {
+                renderLocalAuditLogs();
+            }
+        }
+
+        function renderLocalAuditLogs() {
+            const listEl = document.getElementById('auditLogList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            if (auditLogs.length === 0) {
+                listEl.innerHTML = `<p class="text-cream-800/50 text-center py-2">尚無稽核紀錄</p>`;
+                return;
+            }
+
+            auditLogs.slice(0, 20).forEach(log => {
+                const item = document.createElement('div');
+                item.className = "flex items-start justify-between border-b border-cream-100 pb-1.5";
+                item.innerHTML = `
+                    <div>
+                        <span class="font-bold text-cream-800">${log.action}</span>
+                        <p class="text-cream-800/70">${log.details}</p>
+                    </div>
+                    <span class="text-[10px] text-cream-800/40 whitespace-nowrap ml-2">${new Date(log.timestamp).toLocaleString('zh-TW')}</span>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function maskEmpId(empId) {
+            if (!empId) return "----";
+            if (empId.length <= 2) return empId[0] + "*";
+            return empId.slice(0, 2) + "*".repeat(Math.max(1, empId.length - 2));
+        }
+
+        window.renderSlotGrid = function() {
+            const grid = document.getElementById('slotGrid');
+            const displayDate = document.getElementById('currentDateDisplay');
+            if (displayDate) displayDate.innerText = selectedDate;
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            SLOTS.forEach(slot => {
+                const docId = `${selectedDate}_${slot.id}`;
+                const booking = reservations[docId];
+                const isBooked = !!booking;
+                
+                // Identify if slot belongs to active user session
+                const isMine = isBooked && (
+                    (currentUser && booking.userId === currentUser.uid) ||
+                    (activeEmpId && booking.employeeId && booking.employeeId.toUpperCase() === activeEmpId.toUpperCase())
+                );
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border transition duration-200 flex flex-col justify-between space-y-3 ${
+                    isMine
+                        ? 'bg-accent-terracotta/10 border-accent-terracotta shadow-sm'
+                        : isBooked
+                        ? 'bg-cream-100/60 border-cream-200'
+                        : 'bg-white border-cream-200 hover:border-accent-olive shadow-xs'
+                }`;
+
+                let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">可預約</span>`;
+                if (isMine) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-accent-terracotta text-white">我的預約</span>`;
+                } else if (isBooked) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-cream-300 text-cream-800">已額滿</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-cream-800"><i class="fa-regular fa-clock text-accent-olive mr-1"></i> ${slot.label}</span>
+                        ${statusBadge}
+                    </div>
+
+                    ${isBooked ? `
+                        <div class="text-xs text-cream-800/70 space-y-0.5 bg-white/60 p-2 rounded-xl">
+                            <p><strong>員編：</strong> ${maskEmpId(booking.employeeId)}</p>
+                            <p><strong>單位：</strong> ${booking.department}</p>
+                        </div>
+                    ` : `
+                        <p class="text-xs text-cream-800/40">此時段開放預約使用</p>
+                    `}
+
+                    <div>
+                        ${isMine ? `
+                            <button onclick="requestCancelBooking('${docId}')" class="w-full py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1 cursor-pointer">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>取消我的預約</span>
+                            </button>
+                        ` : isBooked ? `
+                            <button onclick="handleBookedSlotClick('${docId}')" class="w-full py-2 bg-cream-200/70 text-cream-800 hover:bg-rose-50 hover:text-rose-600 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-1 cursor-pointer">
+                                <i class="fa-solid fa-lock"></i>
+                                <span>已被預約 (點擊核對取消)</span>
+                            </button>
+                        ` : `
+                            <button onclick="openBookingModal('${slot.id}', '${slot.label}')" class="w-full py-2 bg-accent-olive text-white rounded-xl text-xs font-semibold shadow-xs hover:bg-accent-olive/90 transition flex items-center justify-center space-x-1 cursor-pointer">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>立即預約</span>
+                            </button>
+                        `}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        };
+
+        window.handleBookedSlotClick = function(docId) {
+            const booking = reservations[docId];
+            if (!booking) return;
+
+            const isMine = (
+                (currentUser && booking.userId === currentUser.uid) ||
+                (activeEmpId && booking.employeeId && booking.employeeId.toUpperCase() === activeEmpId.toUpperCase())
+            );
+
+            if (isMine) {
+                requestCancelBooking(docId);
+            } else {
+                pendingVerifyDocId = docId;
+                document.getElementById('verifyEmpIdInput').value = '';
+                document.getElementById('verifyCancelModal').classList.remove('hidden');
+            }
+        };
+
+        window.closeVerifyCancelModal = function() {
+            pendingVerifyDocId = null;
+            document.getElementById('verifyCancelModal').classList.add('hidden');
+        };
+
+        window.submitVerifyAndCancel = function() {
+            if (!pendingVerifyDocId) return;
+            const inputEmp = document.getElementById('verifyEmpIdInput').value.trim().toUpperCase();
+            const booking = reservations[pendingVerifyDocId];
+
+            if (!booking) {
+                showToast("查無該筆預約紀錄", "error");
+                closeVerifyCancelModal();
+                return;
+            }
+
+            if (booking.employeeId && booking.employeeId.toUpperCase() === inputEmp) {
+                activeEmpId = inputEmp;
+                sessionStorage.setItem('vghks_active_emp_id', activeEmpId);
+                const targetDocId = pendingVerifyDocId;
+                closeVerifyCancelModal();
+                requestCancelBooking(targetDocId);
+            } else {
+                showToast("員工編號核對不符，無法取消他人預約！", "error");
+            }
+        };
+
+        window.renderMyBookings = function() {
+            const listEl = document.getElementById('myBookingsList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            const searchInput = document.getElementById('myEmpSearchInput');
+            const empSearch = searchInput ? searchInput.value.trim().toUpperCase() : (activeEmpId || '');
+            
+            const myBookings = Object.entries(reservations)
+                .map(([id, data]) => ({ id, ...data }))
+                .filter(item => {
+                    if (!item.employeeId) return false;
+                    const isMyUid = currentUser && item.userId === currentUser.uid;
+                    const isMyEmp = empSearch && item.employeeId.toUpperCase() === empSearch;
+                    return isMyUid || isMyEmp;
+                })
+                .sort((a, b) => a.date.localeCompare(b.date));
+
+            const badge = document.getElementById('myCountBadge');
+            if (badge) badge.innerText = myBookings.length;
+
+            if (myBookings.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-cream-800/50 space-y-2">
+                        <i class="fa-solid fa-folder-open text-3xl mb-1"></i>
+                        <p class="text-sm">尚無預約紀錄，請在上方輸入員工編號查詢歷史紀錄</p>
+                    </div>
+                `;
+                return;
+            }
+
+            myBookings.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-cream-50 p-4 rounded-2xl border border-cream-200 space-y-2 relative";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-cream-200 pb-2">
+                        <span class="text-sm font-bold text-accent-olive"><i class="fa-regular fa-calendar mr-1"></i> ${item.date} (${item.slotLabel})</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">已確認</span>
+                    </div>
+                    <div class="text-xs text-cream-800/80 space-y-1">
+                        <p><strong>員工編號：</strong> ${maskEmpId(item.employeeId)}</p>
+                        <p><strong>科別單位：</strong> ${item.department}</p>
+                        <p><strong>聯絡電話：</strong> ${item.contact}</p>
+                        ${item.purpose ? `<p><strong>用途：</strong> ${item.purpose}</p>` : ''}
+                    </div>
+                    <div class="pt-2 text-right">
+                        <button onclick="requestCancelBooking('${item.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold hover:bg-rose-100 transition cursor-pointer">
+                            <i class="fa-solid fa-trash-can mr-1"></i> 取消預約
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        };
+
+        window.searchMyBookingsByEmp = function() {
+            const searchInput = document.getElementById('myEmpSearchInput');
+            if (searchInput && searchInput.value.trim()) {
+                activeEmpId = searchInput.value.trim().toUpperCase();
+                sessionStorage.setItem('vghks_active_emp_id', activeEmpId);
+            }
+            renderMyBookings();
+            renderSlotGrid();
+            showToast("已更新查詢清單", "info");
+        };
+
+        window.openBookingModal = function(slotId, slotLabel) {
+            targetSlotToBook = { id: slotId, label: slotLabel };
+            document.getElementById('modalDate').innerText = selectedDate;
+            document.getElementById('modalSlot').innerText = slotLabel;
+            
+            // Clean modal fields and set back to readonly to block browser auto-fill
+            const fields = ['bookEmpId', 'bookEmpIdConfirm', 'bookContact'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = '';
+                    el.setAttribute('readonly', 'readonly');
+                }
+            });
+
+            document.getElementById('bookDepartment').value = '';
+            document.getElementById('bookPurpose').value = '';
+
+            document.getElementById('bookingModal').classList.remove('hidden');
+        };
+
+        window.closeBookingModal = function() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            targetSlotToBook = null;
+        };
+
+        window.handleBookingSubmit = async function(e) {
+            e.preventDefault();
+            if (!targetSlotToBook) return;
+
+            const empId = document.getElementById('bookEmpId').value.trim().toUpperCase();
+            const empIdConfirm = document.getElementById('bookEmpIdConfirm').value.trim().toUpperCase();
+            const department = document.getElementById('bookDepartment').value;
+            const contact = document.getElementById('bookContact').value.trim();
+            const purpose = document.getElementById('bookPurpose').value.trim();
+
+            if (!/^[A-Z]\d{4}$/.test(empId)) {
+                showToast("員工編號輸入錯誤", "error");
+                return;
+            }
+
+            if (empId !== empIdConfirm) {
+                showToast("兩次輸入的員工編號不一致，請再次確認！", "error");
+                return;
+            }
+
+            activeEmpId = empId;
+            sessionStorage.setItem('vghks_active_emp_id', activeEmpId);
+
+            const submitBtn = document.getElementById('submitBookingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 寫入中...`;
+
+            const docId = `${selectedDate}_${targetSlotToBook.id}`;
+
+            const newBookingData = {
+                date: selectedDate,
+                slotId: targetSlotToBook.id,
+                slotLabel: targetSlotToBook.label,
+                employeeId: empId,
+                department: department,
+                contact: contact,
+                purpose: purpose,
+                status: "confirmed",
+                userId: currentUser ? currentUser.uid : 'anon_user',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (isFirebaseActive && db) {
+                try {
+                    if (!currentUser && auth) {
+                        const userCred = await signInAnonymously(auth);
+                        currentUser = userCred.user;
+                        newBookingData.userId = currentUser.uid;
+                    }
+
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+                    
+                    await runTransaction(db, async (transaction) => {
+                        const sfDoc = await transaction.get(docRef);
+                        if (sfDoc.exists() && sfDoc.data().status === 'confirmed') {
+                            throw new Error("SLOT_ALREADY_BOOKED");
+                        }
+                        transaction.set(docRef, newBookingData);
+                    });
+
+                    await recordAuditLog('CREATE_RESERVATION', `建立預約：${selectedDate} ${targetSlotToBook.label} (員編:${empId} ${department})`);
+                    showToast("預約成功！員編已確認並安全寫入雲端。", "success");
+
+                } catch (err) {
+                    console.error("Booking transaction error:", err);
+                    if (err.message === "SLOT_ALREADY_BOOKED") {
+                        showToast("殘念！該時段剛剛已被其他人搶先預約了。", "error");
+                    } else if (err.code === "permission-denied" || (err.message && err.message.includes("permissions"))) {
+                        showToast("寫入權限不足！請確認已在 Firebase Console 發布 Firestore 安全規則。", "error");
+                    } else {
+                        showToast("預約寫入失敗，請確認網路連線與權限", "error");
+                    }
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認並送出預約</span>`;
+                    closeBookingModal();
+                    renderSlotGrid();
+                    renderMyBookings();
+                }
+            } else {
+                if (reservations[docId] && reservations[docId].status === 'confirmed') {
+                    showToast("該時段已被預約！", "error");
+                } else {
+                    reservations[docId] = newBookingData;
+                    localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
+                    recordAuditLog('CREATE_RESERVATION', `[展示模式] 建立預約：${selectedDate} ${targetSlotToBook.label} (員編:${empId})`);
+                    showToast("預約成功！（寫入本機展示快取）", "success");
+                    renderSlotGrid();
+                    renderMyBookings();
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認並送出預約</span>`;
+                closeBookingModal();
+            }
+        };
+
+        window.requestCancelBooking = function(docId) {
+            pendingCancelDocId = docId;
+            const modal = document.getElementById('cancelConfirmModal');
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeCancelModal = function() {
+            pendingCancelDocId = null;
+            const modal = document.getElementById('cancelConfirmModal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.executeCancelBooking = async function() {
+            if (!pendingCancelDocId) return;
+            const docId = pendingCancelDocId;
+            closeCancelModal();
+
+            if (isFirebaseActive && db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+                    
+                    // Attempt physical delete for clean release
+                    await deleteDoc(docRef);
+
+                    await recordAuditLog('CANCEL_RESERVATION', `取消預約：${docId}`);
+                    showToast("已成功取消預約", "info");
+
+                    delete reservations[docId];
+                    renderSlotGrid();
+                    renderMyBookings();
+                    if (isAdmin) renderAdminTable();
+
+                } catch (err) {
+                    console.warn("Delete doc direct error, attempting status update:", err);
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+                        await updateDoc(docRef, {
+                            status: 'cancelled',
+                            updatedAt: new Date().toISOString()
+                        });
+                        showToast("已成功取消預約", "info");
+                        delete reservations[docId];
+                    } catch (upErr) {
+                        delete reservations[docId];
+                        localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
+                        showToast("已取消預約（同步本機狀態）", "info");
+                    }
+                    renderSlotGrid();
+                    renderMyBookings();
+                    if (isAdmin) renderAdminTable();
+                }
+            } else {
+                if (reservations[docId]) {
+                    delete reservations[docId];
+                    localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
+                    recordAuditLog('CANCEL_RESERVATION', `[展示模式] 取消預約：${docId}`);
+                    showToast("已成功取消預約（本機模式）", "info");
+                    renderSlotGrid();
+                    renderMyBookings();
+                    if (isAdmin) renderAdminTable();
+                } else {
+                    showToast("查無該筆預約紀錄", "error");
+                }
+            }
+        };
+
+        async function checkAdminStatus(user) {
+            if (!user || user.isAnonymous) {
+                isAdmin = false;
+                toggleAdminUI(false);
+                return;
+            }
+
+            if (isFirebaseActive && db) {
+                try {
+                    const adminDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'admins', user.uid);
+                    const adminSnap = await getDoc(adminDocRef);
+
+                    if (adminSnap.exists() && adminSnap.data().role === 'admin') {
+                        isAdmin = true;
+                        toggleAdminUI(true, user.email);
+                        showToast("已成功登入管理員系統", "success");
+                    } else {
+                        isAdmin = false;
+                        toggleAdminUI(false);
+                    }
+                } catch (err) {
+                    isAdmin = false;
+                    toggleAdminUI(false);
+                }
+            }
+        }
+
+        window.handleAdminLogin = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const pass = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('adminLoginBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 驗證中...`;
+
+            if (isFirebaseActive && auth) {
+                try {
+                    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+                    await checkAdminStatus(userCred.user);
+                } catch (err) {
+                    showToast("管理員登入失敗，請確認帳號密碼", "error");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "登入後台";
+                }
+            } else {
+                isAdmin = true;
+                toggleAdminUI(true, email + " (展示後台)");
+                showToast("已登入展示管理員後台", "success");
+                btn.disabled = false;
+                btn.innerText = "登入後台";
+            }
+        };
+
+        window.handleAdminLogout = async function() {
+            if (isFirebaseActive && auth) {
+                await signOut(auth);
+            }
+            isAdmin = false;
+            toggleAdminUI(false);
+            showToast("已登出管理員系統", "info");
+        };
+
+        function toggleAdminUI(isLoggedIn, email = '') {
+            const loginForm = document.getElementById('adminLoginForm');
+            const panel = document.getElementById('adminPanel');
+
+            if (isLoggedIn) {
+                if (loginForm) loginForm.classList.add('hidden');
+                if (panel) panel.classList.remove('hidden');
+                const userDisplay = document.getElementById('adminUserDisplay');
+                if (userDisplay) userDisplay.innerText = `已登入：${email}`;
+                renderAdminTable();
+            } else {
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (panel) panel.classList.add('hidden');
+            }
+        }
+
+        window.renderAdminTable = function() {
+            const tableBody = document.getElementById('adminTableBody');
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+
+            const deptFilter = document.getElementById('adminDeptFilter').value;
+
+            const allRes = Object.entries(reservations)
+                .map(([id, data]) => ({ id, ...data }))
+                .filter(item => deptFilter === 'ALL' || item.department === deptFilter)
+                .sort((a, b) => b.date.localeCompare(a.date));
+
+            if (allRes.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-cream-800/50">查無相關預約紀錄</td></tr>`;
+                return;
+            }
+
+            allRes.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-cream-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-medium">${item.date}</td>
+                    <td class="p-3">${item.slotLabel}</td>
+                    <td class="p-3 font-semibold text-accent-olive">${item.employeeId}</td>
+                    <td class="p-3">${item.department}</td>
+                    <td class="p-3">${item.contact}</td>
+                    <td class="p-3 max-w-xs truncate">${item.purpose || '-'}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">已確認</span></td>
+                    <td class="p-3 text-right">
+                        <button onclick="requestCancelBooking('${item.id}')" class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-[11px] font-semibold hover:bg-rose-100 cursor-pointer">
+                            取消
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        };
+
+        window.exportToCSV = function() {
+            const allRes = Object.values(reservations);
+            if (allRes.length === 0) {
+                showToast("無可匯出之預約紀錄", "info");
+                return;
+            }
+
+            let csvContent = "\uFEFF預約日期,時段,員工編號,單位科別,聯絡電話,研究用途,預約狀態\n";
+            allRes.forEach(r => {
+                csvContent += `"${r.date}","${r.slotLabel}","${r.employeeId}","${r.department}","${r.contact}","${r.purpose || ''}","${r.status}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `VGHKS_Research_Lab_Reservations_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            recordAuditLog('EXPORT_CSV', '匯出全院預約紀錄 CSV');
+        };
+
+        async function recordAuditLog(action, details) {
+            const logEntry = {
+                action,
+                details,
+                userId: currentUser ? currentUser.uid : 'anonymous',
+                timestamp: new Date().toISOString()
+            };
+
+            if (isFirebaseActive && db) {
+                try {
+                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'audit_logs');
+                    await addDoc(logsRef, logEntry);
+                } catch (e) { console.error("Audit log error:", e); }
+            } else {
+                auditLogs.unshift(logEntry);
+                localStorage.setItem('vghks_local_audit_logs', JSON.stringify(auditLogs));
+                renderLocalAuditLogs();
+            }
+        }
+
+        window.openConfigModal = function() {
+            document.getElementById('configModal').classList.remove('hidden');
+        };
+
+        window.closeConfigModal = function() {
+            document.getElementById('configModal').classList.add('hidden');
+        };
+
+        window.saveFirebaseConfig = function() {
+            const key = document.getElementById('cfgApiKey').value.trim();
+            const proj = document.getElementById('cfgProjectId').value.trim();
+
+            if (key) {
+                localStorage.setItem('vghks_custom_api_key', key);
+            } else {
+                localStorage.removeItem('vghks_custom_api_key');
+            }
+
+            if (proj) {
+                localStorage.setItem('vghks_custom_project_id', proj);
+            }
+
+            showToast("已儲存設定！頁面即將重新載入...", "success");
+            setTimeout(() => location.reload(), 1200);
+        };
+
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+            document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+
+            const activeTabBtn = document.getElementById(`tab-${tabName}`);
+            const activeSec = document.getElementById(`sec-${tabName}`);
+            if (activeTabBtn) activeTabBtn.classList.add('tab-active');
+            if (activeSec) activeSec.classList.remove('hidden');
+
+            if (tabName === 'my-bookings') renderMyBookings();
+            if (tabName === 'admin' && isAdmin) renderAdminTable();
+        };
+
+        window.onDateChange = function() {
+            selectedDate = document.getElementById('dateSelect').value;
+            renderSlotGrid();
+        };
+
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            const bgColors = {
+                success: 'bg-emerald-800 text-white',
+                error: 'bg-rose-800 text-white',
+                info: 'bg-cream-800 text-white'
+            };
+
+            toast.className = `px-4 py-3 rounded-2xl shadow-lg text-xs font-semibold flex items-center space-x-2 transition transform duration-300 pointer-events-auto ${bgColors[type] || bgColors.info}`;
+            toast.innerHTML = `<span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+    </script>
+</body>
+</html>
                         cream: {
                             50: '#FAF8F5',
                             100: '#F4EFEA',
