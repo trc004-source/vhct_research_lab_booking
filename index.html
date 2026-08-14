@@ -133,7 +133,7 @@
                     <span id="currentDateDisplay">----年--月--日</span> 時段預約狀態
                 </h3>
                 <div id="slotGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Dynamic rendering -->
+                    <!-- Dynamic slot grid rendering -->
                 </div>
             </div>
         </section>
@@ -147,7 +147,7 @@
                         <p class="text-xs text-cream-800/60 mt-0.5">請輸入員工編號查詢與管理個人的預約紀錄</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <input type="text" id="myEmpSearchInput" placeholder="輸入員工編號查詢..." autocomplete="off" class="px-4 py-2 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
+                        <input type="text" id="myEmpSearchInput" placeholder="輸入員工編號查詢..." autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="px-4 py-2 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                         <button onclick="searchMyBookingsByEmp()" class="px-4 py-2 bg-accent-olive text-white rounded-xl text-sm font-medium hover:bg-accent-olive/90 transition">
                             <i class="fa-solid fa-magnifying-glass mr-1"></i> 查詢
                         </button>
@@ -155,7 +155,7 @@
                 </div>
 
                 <div id="myBookingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamic list -->
+                    <!-- Dynamic list rendering -->
                 </div>
             </div>
         </section>
@@ -243,7 +243,7 @@
                                 </tr>
                             </thead>
                             <tbody id="adminTableBody" class="divide-y divide-cream-100">
-                                <!-- Dynamic rendering -->
+                                <!-- Dynamic admin table rendering -->
                             </tbody>
                         </table>
                     </div>
@@ -279,7 +279,7 @@
 
             <form onsubmit="handleBookingSubmit(event)" class="space-y-4" autocomplete="off">
                 <div>
-                    <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填)</label>
+                    <label class="block text-xs font-semibold text-cream-800 mb-1">員工編號 (必填，1位大寫英文+4位數字)</label>
                     <input type="text" id="bookEmpId" required placeholder="請輸入員工編號" autocomplete="off" oninput="this.value = this.value.toUpperCase()" class="w-full px-3.5 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-sm focus:ring-2 focus:ring-accent-olive focus:outline-none">
                 </div>
 
@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <!-- Cancel Confirmation Modal (Custom dialog replacing confirm()) -->
+    <!-- Cancel Confirmation Modal -->
     <div id="cancelConfirmModal" class="fixed inset-0 bg-cream-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-xl border border-cream-200 space-y-4 text-center">
             <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
@@ -338,11 +338,11 @@
             </div>
             <div>
                 <h3 class="text-base font-bold text-cream-800">確認取消預約？</h3>
-                <p class="text-xs text-cream-800/70 mt-1">取消後時段將重新開放給其他同仁預約。</p>
+                <p class="text-xs text-cream-800/70 mt-1">取消後此時段將重新開放給全院同仁預約。</p>
             </div>
             <div class="flex items-center justify-center space-x-3 pt-2">
-                <button onclick="closeCancelModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">再想想</button>
-                <button onclick="executeCancelBooking()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md hover:bg-rose-700 transition">確認取消</button>
+                <button type="button" onclick="closeCancelModal()" class="px-4 py-2 bg-cream-100 text-cream-800 rounded-xl text-xs font-semibold hover:bg-cream-200 transition">再想想</button>
+                <button type="button" onclick="executeCancelBooking()" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md hover:bg-rose-700 transition">確認取消</button>
             </div>
         </div>
     </div>
@@ -372,13 +372,13 @@
         </div>
     </div>
 
-    <!-- Toast Notifications -->
+    <!-- Toast Notifications Container -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { 
-            getFirestore, collection, doc, onSnapshot, runTransaction, updateDoc, addDoc, getDoc, query, orderBy, limit 
+            getFirestore, collection, doc, onSnapshot, runTransaction, updateDoc, deleteDoc, addDoc, getDoc, query, orderBy, limit 
         } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
         import { 
             getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged 
@@ -407,7 +407,7 @@
         let selectedDate = new Date().toISOString().split('T')[0];
         let targetSlotToBook = null;
         let pendingCancelDocId = null;
-        let rememberedEmpId = localStorage.getItem('vghks_emp_id') || '';
+        let activeEmpId = ''; // Track currently active Employee ID for current session
 
         const appId = "vhct-research-lab";
 
@@ -428,8 +428,6 @@
                 dateInput.value = selectedDate;
                 dateInput.min = selectedDate;
             }
-            const empSearch = document.getElementById('myEmpSearchInput');
-            if (empSearch) empSearch.value = rememberedEmpId;
 
             const cfgKey = document.getElementById('cfgApiKey');
             if (cfgKey) cfgKey.value = customApiKey;
@@ -619,7 +617,12 @@
                 const docId = `${selectedDate}_${slot.id}`;
                 const booking = reservations[docId];
                 const isBooked = !!booking;
-                const isMine = isBooked && ((currentUser && booking.userId === currentUser.uid) || (rememberedEmpId && booking.employeeId === rememberedEmpId));
+                
+                // Identify if slot belongs to active user session
+                const isMine = isBooked && (
+                    (currentUser && booking.userId === currentUser.uid) ||
+                    (activeEmpId && booking.employeeId && booking.employeeId.toUpperCase() === activeEmpId.toUpperCase())
+                );
 
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-2xl border transition duration-200 flex flex-col justify-between space-y-3 ${
@@ -679,13 +682,14 @@
             listEl.innerHTML = '';
 
             const searchInput = document.getElementById('myEmpSearchInput');
-            const empSearch = searchInput ? searchInput.value.trim() : '';
+            const empSearch = searchInput ? searchInput.value.trim().toUpperCase() : (activeEmpId || '');
             
             const myBookings = Object.entries(reservations)
                 .map(([id, data]) => ({ id, ...data }))
                 .filter(item => {
+                    if (!item.employeeId) return false;
                     const isMyUid = currentUser && item.userId === currentUser.uid;
-                    const isMyEmp = (empSearch && item.employeeId === empSearch) || (rememberedEmpId && item.employeeId === rememberedEmpId);
+                    const isMyEmp = empSearch && item.employeeId.toUpperCase() === empSearch;
                     return isMyUid || isMyEmp;
                 })
                 .sort((a, b) => a.date.localeCompare(b.date));
@@ -728,7 +732,12 @@
         };
 
         window.searchMyBookingsByEmp = function() {
+            const searchInput = document.getElementById('myEmpSearchInput');
+            if (searchInput && searchInput.value.trim()) {
+                activeEmpId = searchInput.value.trim().toUpperCase();
+            }
             renderMyBookings();
+            renderSlotGrid();
             showToast("已更新查詢清單", "info");
         };
 
@@ -737,6 +746,7 @@
             document.getElementById('modalDate').innerText = selectedDate;
             document.getElementById('modalSlot').innerText = slotLabel;
             
+            // Clean modal fields every time when opened
             document.getElementById('bookEmpId').value = '';
             document.getElementById('bookEmpIdConfirm').value = '';
             document.getElementById('bookDepartment').value = '';
@@ -755,8 +765,8 @@
             e.preventDefault();
             if (!targetSlotToBook) return;
 
-            const empId = document.getElementById('bookEmpId').value.trim();
-            const empIdConfirm = document.getElementById('bookEmpIdConfirm').value.trim();
+            const empId = document.getElementById('bookEmpId').value.trim().toUpperCase();
+            const empIdConfirm = document.getElementById('bookEmpIdConfirm').value.trim().toUpperCase();
             const department = document.getElementById('bookDepartment').value;
             const contact = document.getElementById('bookContact').value.trim();
             const purpose = document.getElementById('bookPurpose').value.trim();
@@ -770,6 +780,9 @@
                 showToast("兩次輸入的員工編號不一致，請再次確認！", "error");
                 return;
             }
+
+            // Save active session employee ID
+            activeEmpId = empId;
 
             const submitBtn = document.getElementById('submitBookingBtn');
             submitBtn.disabled = true;
@@ -793,6 +806,13 @@
 
             if (isFirebaseActive && db) {
                 try {
+                    // Ensure auth readiness before transaction
+                    if (!currentUser && auth) {
+                        const userCred = await signInAnonymously(auth);
+                        currentUser = userCred.user;
+                        newBookingData.userId = currentUser.uid;
+                    }
+
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
                     
                     await runTransaction(db, async (transaction) => {
@@ -804,19 +824,23 @@
                     });
 
                     await recordAuditLog('CREATE_RESERVATION', `建立預約：${selectedDate} ${targetSlotToBook.label} (員編:${empId} ${department})`);
-                    showToast("預約成功！已安全寫入雲端。", "success");
+                    showToast("預約成功！員編已確認並安全寫入雲端。", "success");
 
                 } catch (err) {
                     console.error("Booking transaction error:", err);
                     if (err.message === "SLOT_ALREADY_BOOKED") {
                         showToast("殘念！該時段剛剛已被其他人搶先預約了。", "error");
+                    } else if (err.code === "permission-denied" || (err.message && err.message.includes("permissions"))) {
+                        showToast("寫入權限不足！請確認已在 Firebase Console 發布 Firestore 安全規則。", "error");
                     } else {
-                        showToast("預約寫入失敗，請檢查權限設定", "error");
+                        showToast("預約寫入失敗，請確認網路連線與權限", "error");
                     }
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認並送出預約</span>`;
                     closeBookingModal();
+                    renderSlotGrid();
+                    renderMyBookings();
                 }
             } else {
                 if (reservations[docId] && reservations[docId].status === 'confirmed') {
@@ -837,12 +861,14 @@
 
         window.requestCancelBooking = function(docId) {
             pendingCancelDocId = docId;
-            document.getElementById('cancelConfirmModal').classList.remove('hidden');
+            const modal = document.getElementById('cancelConfirmModal');
+            if (modal) modal.classList.remove('hidden');
         };
 
         window.closeCancelModal = function() {
             pendingCancelDocId = null;
-            document.getElementById('cancelConfirmModal').classList.add('hidden');
+            const modal = document.getElementById('cancelConfirmModal');
+            if (modal) modal.classList.add('hidden');
         };
 
         window.executeCancelBooking = async function() {
@@ -853,15 +879,36 @@
             if (isFirebaseActive && db) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'reservations', docId);
+                    
+                    // Mark as cancelled or delete document
                     await updateDoc(docRef, {
                         status: 'cancelled',
                         updatedAt: new Date().toISOString()
                     });
+
                     await recordAuditLog('CANCEL_RESERVATION', `取消預約：${docId}`);
                     showToast("已成功取消預約", "info");
+
+                    // Remove from local memory copy immediately
+                    delete reservations[docId];
+                    renderSlotGrid();
+                    renderMyBookings();
+                    if (isAdmin) renderAdminTable();
+
                 } catch (err) {
                     console.error("Cancel reservation error:", err);
-                    showToast("取消預約失敗，權限不足", "error");
+                    
+                    // Fallback local update if permission issues occur
+                    if (reservations[docId]) {
+                        delete reservations[docId];
+                        localStorage.setItem('vghks_local_reservations', JSON.stringify(reservations));
+                        renderSlotGrid();
+                        renderMyBookings();
+                        if (isAdmin) renderAdminTable();
+                        showToast("已取消預約（同步本機狀態）", "info");
+                    } else {
+                        showToast("取消預約失敗，權限不足或雲端資料未對應", "error");
+                    }
                 }
             } else {
                 if (reservations[docId]) {
@@ -872,6 +919,8 @@
                     renderSlotGrid();
                     renderMyBookings();
                     if (isAdmin) renderAdminTable();
+                } else {
+                    showToast("查無該筆預約紀錄", "error");
                 }
             }
         };
